@@ -107,7 +107,289 @@
         background: var(--lime);
         color: var(--ink);
       }
+      /* ═══════════════════════════════════════════════════════ */
+      /* PAGE LOADER                                             */
+      /* ═══════════════════════════════════════════════════════ */
+      .page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(
+            1200px 600px at 50% -10%,
+            rgba(99, 253, 2, 0.07),
+            transparent 60%
+          ),
+          linear-gradient(180deg, #010101 0%, #050505 60%, #010101 100%);
+        overflow: hidden;
+        opacity: 1;
+        visibility: visible;
+        transition:
+          opacity 0.6s ease,
+          visibility 0.6s ease;
+        will-change: opacity;
+      }
 
+      .page-loader.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      /* Grid background — matches hero/section grid texture */
+      .loader-grid {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.28;
+        background-image:
+          linear-gradient(rgba(251, 252, 252, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(251, 252, 252, 0.06) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(
+          ellipse 70% 60% at 50% 50%,
+          #000 20%,
+          transparent 80%
+        );
+        -webkit-mask-image: radial-gradient(
+          ellipse 70% 60% at 50% 50%,
+          #000 20%,
+          transparent 80%
+        );
+        animation: loaderGridPan 8s linear infinite;
+      }
+
+      @keyframes loaderGridPan {
+        from {
+          background-position:
+            0 0,
+            0 0;
+        }
+        to {
+          background-position:
+            56px 56px,
+            56px 56px;
+        }
+      }
+
+      /* Ambient lime bloom */
+      .loader-bloom {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(720px, 140vw);
+        height: 520px;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(99, 253, 2, 0.16),
+          transparent 65%
+        );
+        filter: blur(70px);
+        animation: loaderBloomPulse 3.2s ease-in-out infinite;
+      }
+
+      @keyframes loaderBloomPulse {
+        0%,
+        100% {
+          opacity: 0.65;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.08);
+        }
+      }
+
+      .loader-core {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0 1.5rem;
+        text-align: center;
+      }
+
+      /* ── Mark (S + orbiting rings) ────────────────────────── */
+      .loader-mark {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 96px;
+        height: 96px;
+        isolation: isolate;
+      }
+
+      .loader-mark-letter {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 1.55rem;
+        color: var(--ink);
+        background: linear-gradient(
+          180deg,
+          var(--lime-hi) 0%,
+          var(--lime) 50%,
+          var(--lime-lo) 100%
+        );
+        clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.55),
+          inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+          0 8px 26px -8px rgba(99, 253, 2, 0.75);
+        animation: loaderMarkFloat 2.4s ease-in-out infinite;
+      }
+
+      @keyframes loaderMarkFloat {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-4px);
+        }
+      }
+
+      .loader-mark-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 1px solid transparent;
+        border-top-color: rgba(99, 253, 2, 0.85);
+        border-right-color: rgba(99, 253, 2, 0.25);
+        filter: drop-shadow(0 0 6px rgba(99, 253, 2, 0.5));
+        animation: loaderRingSpin 1.4s linear infinite;
+      }
+
+      .loader-mark-ring--2 {
+        inset: 12px;
+        border-top-color: rgba(99, 253, 2, 0.35);
+        border-right-color: rgba(99, 253, 2, 0.12);
+        border-top-width: 1.5px;
+        animation-duration: 2.1s;
+        animation-direction: reverse;
+      }
+
+      @keyframes loaderRingSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Meta label ───────────────────────────────────────── */
+      .loader-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: "Inter", sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(251, 252, 252, 0.55);
+      }
+
+      .loader-dots {
+        display: inline-flex;
+        gap: 3px;
+      }
+
+      .loader-dots i {
+        display: block;
+        width: 3px;
+        height: 3px;
+        background: var(--lime);
+        box-shadow: 0 0 8px var(--lime);
+        animation: loaderDotFade 1.2s ease-in-out infinite;
+      }
+
+      .loader-dots i:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .loader-dots i:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .loader-dots i:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes loaderDotFade {
+        0%,
+        100% {
+          opacity: 0.25;
+          transform: translateY(0);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-2px);
+        }
+      }
+
+      /* ── Progress bar (chamfered, skeuomorphic) ───────────── */
+      .loader-bar {
+        position: relative;
+        width: min(280px, 70vw);
+        height: 4px;
+        background: linear-gradient(180deg, #050505 0%, #0d0d0d 100%);
+        border-top: 1px solid #000;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+        clip-path: polygon(4px 0, 100% 0, 100% 100%, 0 100%, 0 4px);
+        overflow: hidden;
+      }
+
+      .loader-bar-fill {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--lime-lo) 0%,
+          var(--lime) 50%,
+          var(--lime-hi) 100%
+        );
+        box-shadow:
+          0 0 12px rgba(99, 253, 2, 0.7),
+          0 0 24px rgba(99, 253, 2, 0.35);
+        transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      /* ── Percentage readout ───────────────────────────────── */
+      .loader-percent {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        letter-spacing: 0.28em;
+        color: rgba(251, 252, 252, 0.4);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .loader-pct-sign {
+        margin-left: 0.15em;
+        color: rgba(99, 253, 2, 0.7);
+      }
+
+      /* ── Reduced motion ───────────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        .loader-grid,
+        .loader-bloom,
+        .loader-mark-letter,
+        .loader-mark-ring,
+        .loader-dots i {
+          animation: none !important;
+        }
+      }
       .scroll-progress {
         position: fixed;
         top: 0;
@@ -3345,6 +3627,39 @@
   </head>
 
   <body>
+    <!-- ═══ PAGE LOADER ═══ -->
+    <div
+      class="page-loader"
+      id="pageLoader"
+      aria-hidden="true"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="loader-grid" aria-hidden="true"></div>
+      <div class="loader-bloom" aria-hidden="true"></div>
+
+      <div class="loader-core">
+        <div class="loader-mark" aria-hidden="true">
+          <span class="loader-mark-letter">S</span>
+          <span class="loader-mark-ring"></span>
+          <span class="loader-mark-ring loader-mark-ring--2"></span>
+        </div>
+
+        <div class="loader-meta">
+          <span class="loader-label">Initialising</span>
+          <span class="loader-dots"> <i></i><i></i><i></i> </span>
+        </div>
+
+        <div class="loader-bar" aria-hidden="true">
+          <span class="loader-bar-fill"></span>
+        </div>
+
+        <p class="loader-percent" aria-hidden="true">
+          <span id="loaderPercent">0</span
+          ><span class="loader-pct-sign">%</span>
+        </p>
+      </div>
+    </div>
     <div class="scroll-progress" aria-hidden="true"></div>
 
     <!-- ═══ HEADER ═══ -->
@@ -5008,6 +5323,90 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <script>
+      (function () {
+        "use strict";
+
+        var loader = document.getElementById("pageLoader");
+        var pctEl = document.getElementById("loaderPercent");
+        var barEl = loader ? loader.querySelector(".loader-bar-fill") : null;
+        if (!loader || !barEl) return;
+
+        var MIN_DURATION = 900; // minimum visible time (ms)
+        var FINISH_AT = 100; // final percent
+        var startedAt = performance.now();
+
+        var reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        /* Smooth, decelerating fake progress (never reaches 100 on its own) */
+        var progress = 0;
+        var rafId = null;
+
+        function render() {
+          barEl.style.width = progress + "%";
+          if (pctEl) pctEl.textContent = Math.round(progress);
+        }
+
+        function tick(now) {
+          var t = (now - startedAt) / 1000; // seconds elapsed
+          // asymptotic ease-out: 0 → ~92 over ~2s
+          var target = 92 * (1 - Math.exp(-t * 1.6));
+          progress += (target - progress) * 0.18;
+          render();
+          rafId = requestAnimationFrame(tick);
+        }
+
+        function finish() {
+          var elapsed = performance.now() - startedAt;
+          var wait = Math.max(0, MIN_DURATION - elapsed);
+
+          setTimeout(function () {
+            if (rafId) {
+              cancelAnimationFrame(rafId);
+              rafId = null;
+            }
+            progress = FINISH_AT;
+            render();
+
+            // brief hold at 100% before fade-out
+            setTimeout(function () {
+              loader.classList.add("is-hidden");
+              loader.setAttribute("aria-hidden", "true");
+              document.documentElement.classList.remove("is-loading");
+              document.body.classList.remove("is-loading");
+
+              // remove node after transition completes
+              setTimeout(function () {
+                if (loader.parentNode) loader.parentNode.removeChild(loader);
+              }, 700);
+            }, 220);
+          }, wait);
+        }
+
+        /* Lock scroll while the loader is up */
+        document.documentElement.classList.add("is-loading");
+        document.body.classList.add("is-loading");
+
+        if (reduceMotion) {
+          // No animation loop for reduced-motion users — just snap when ready.
+          progress = FINISH_AT;
+          render();
+          finish();
+        } else {
+          rafId = requestAnimationFrame(tick);
+
+          if (document.readyState === "complete") {
+            finish();
+          } else {
+            window.addEventListener("load", finish, { once: true });
+          }
+
+          // Safety net — force-finish if the load event never fires (e.g. blocked video)
+          setTimeout(finish, 8000);
+        }
+      })();
+
       (function () {
         "use strict";
 
