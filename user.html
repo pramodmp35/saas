@@ -1,0 +1,3588 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Dashboard — Stackly</title>
+<meta name="description" content="Your Stackly account dashboard." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        lime: { DEFAULT:'#63fd02', 400:'#8bff3d', 500:'#63fd02', 600:'#4fd100', 700:'#3b9c00' },
+        ink:  { DEFAULT:'#010101', 900:'#050505', 800:'#0a0a0a', 700:'#111111', 600:'#1a1a1a' },
+        snow: '#fbfcfc',
+        fire: '#ff5722'
+      },
+      fontFamily: {
+        display: ['"Space Grotesk"','system-ui','sans-serif'],
+        sans: ['Inter','system-ui','sans-serif']
+      }
+    }
+  }
+}
+</script>
+
+<style>
+:root{
+  --lime:#63fd02;
+  --lime-hi:#8bff3d;
+  --lime-lo:#4fd100;
+  --ink:#010101;
+  --red:#ff4d4d;
+  --fire:#ff5722;
+  --chamfer:14px;
+  --sidebar-w:264px;
+}
+@media (min-width: 640px){ :root{ --chamfer:18px; } }
+@media (min-width: 1024px){ :root{ --chamfer:22px; } }
+
+*, *::before, *::after{ border-radius:0 !important; box-sizing:border-box; }
+
+html, body{ min-height:100%; }
+body{
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(99,253,2,.05), transparent 60%),
+    radial-gradient(900px 500px at 100% 40%, rgba(99,253,2,.025), transparent 65%),
+    linear-gradient(180deg, #010101 0%, #050505 60%, #010101 100%);
+  background-attachment:fixed;
+  color:#fbfcfc;
+  font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{ background:var(--lime); color:var(--ink); }
+
+.chamfer{ clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer)); }
+
+.panel{
+  position:relative;
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.9);
+  border-bottom:1px solid rgba(0,0,0,.98);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 22px 44px -22px rgba(0,0,0,.9);
+  overflow:hidden;
+  isolation:isolate;
+}
+.panel::after{
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.35;
+  background:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.012) 0px,
+    rgba(255,255,255,.012) 1px,
+    transparent 1px,
+    transparent 3px);
+  z-index:0;
+}
+
+/* Buttons */
+.btn-tab{
+  position:relative;
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.5rem;
+  padding:.75rem 1.25rem;
+  font-weight:700; font-size:.75rem;
+  letter-spacing:.08em; text-transform:uppercase;
+  text-decoration:none; border:none; cursor:pointer;
+  isolation:isolate; overflow:hidden;
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  transition: transform .3s cubic-bezier(.22,1,.36,1), filter .3s ease, color .4s ease .06s, text-shadow .4s ease .06s;
+  will-change:transform;
+  white-space:nowrap;
+  font-family:inherit;
+}
+.btn-tab:hover{ transform:translateY(-2px); }
+.btn-tab:active{ transform:translateY(0); }
+.btn-tab::before{
+  content:''; position:absolute; inset:0; z-index:-1;
+  transform:scaleX(0); transform-origin:50% 50%;
+  transition:transform .5s cubic-bezier(.65,0,.35,1);
+  will-change:transform;
+}
+
+.btn-tab--lime{
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 45%, var(--lime-lo) 100%);
+  color:var(--ink);
+  text-shadow:0 1px 0 rgba(255,255,255,.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(0,0,0,.18);
+  filter: drop-shadow(0 6px 14px rgba(99,253,2,.35));
+}
+.btn-tab--lime::before{ background:linear-gradient(180deg, #1e1e1e 0%, #0a0a0a 55%, #020202 100%); }
+.btn-tab--lime:hover{ color:var(--lime); text-shadow:0 0 14px rgba(99,253,2,.55); }
+.btn-tab--lime:hover::before{ transform:scaleX(1); }
+
+.btn-tab--dark{
+  background:linear-gradient(180deg, #2b2b2b 0%, #181818 50%, #0d0d0d 100%);
+  color:#fbfcfc;
+  text-shadow:0 1px 0 rgba(0,0,0,.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.7);
+}
+.btn-tab--dark::before{ background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%); }
+.btn-tab--dark:hover{ color:var(--ink); text-shadow:0 1px 0 rgba(255,255,255,.4); }
+.btn-tab--dark:hover::before{ transform:scaleX(1); }
+
+.btn-tab--ghost{
+  background:rgba(251,252,252,.03);
+  color:#fbfcfc;
+  border-top:1px solid rgba(255,255,255,.1);
+  border-bottom:1px solid rgba(0,0,0,.85);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.btn-tab--ghost::before{ background:linear-gradient(180deg, rgba(99,253,2,.16), rgba(99,253,2,.06)); }
+.btn-tab--ghost:hover{ color:var(--lime); border-top-color:rgba(99,253,2,.4); }
+.btn-tab--ghost:hover::before{ transform:scaleX(1); }
+
+.btn-tab--danger{
+  background:linear-gradient(180deg, #2a1515 0%, #150808 100%);
+  color:#ff7a7a;
+  border-top:1px solid rgba(255,77,77,.2);
+  border-bottom:1px solid rgba(0,0,0,.9);
+}
+.btn-tab--danger::before{ background:linear-gradient(180deg, #ff5252 0%, #cc3333 100%); }
+.btn-tab--danger:hover{ color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.4); }
+.btn-tab--danger:hover::before{ transform:scaleX(1); }
+
+.btn-tab--full{ width:100%; }
+
+.sk-tag{
+  display:inline-block;
+  padding:.42rem .85rem .42rem calc(var(--chamfer) + .25rem);
+  font-size:.62rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase;
+  background:linear-gradient(180deg, #1e1e1e 0%, #0d0d0d 100%);
+  color:var(--lime);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+}
+.sk-tag::before{
+  content:''; display:inline-block; width:5px; height:5px; margin-right:.5rem;
+  background:var(--lime); vertical-align:middle;
+  box-shadow:0 0 8px var(--lime);
+  transform:translateY(-1px);
+}
+.sk-tag--fire{ color:#ff7a45; }
+.sk-tag--fire::before{ background:#ff7a45; box-shadow:0 0 8px #ff7a45; }
+.sk-tag--warn{ color:#ffd84a; }
+.sk-tag--warn::before{ background:#ffd84a; box-shadow:0 0 8px #ffd84a; }
+
+/* Layout */
+.dash{ display:flex; min-height:100svh; position:relative; }
+
+.sidebar{
+  position:fixed;
+  top:0; left:0; bottom:0;
+  width:var(--sidebar-w);
+  z-index:120;
+  display:flex;
+  flex-direction:column;
+  background:linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
+  border-right:1px solid rgba(255,255,255,.06);
+  box-shadow:
+    inset -1px 0 0 rgba(0,0,0,.9),
+    8px 0 24px -12px rgba(0,0,0,.9);
+  transform:translateX(-100%);
+  transition:transform .4s cubic-bezier(.22,1,.36,1);
+  visibility:hidden;
+}
+.sidebar.is-open{ transform:translateX(0); visibility:visible; }
+@media (min-width:1024px){
+  .sidebar{ transform:translateX(0); visibility:visible; }
+}
+
+.sidebar-backdrop{
+  position:fixed; inset:0; z-index:110;
+  background:rgba(1,1,1,.75);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  opacity:0; visibility:hidden;
+  transition:opacity .35s ease, visibility .35s ease;
+}
+.sidebar-backdrop.is-open{ opacity:1; visibility:visible; }
+@media (min-width:1024px){ .sidebar-backdrop{ display:none; } }
+
+.sb-head{
+  padding:1.2rem 1.2rem;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  flex:none;
+}
+.sb-head-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:.72rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:rgba(251,252,252,.35);
+}
+.sb-close{
+  display:grid; place-items:center;
+  width:32px; height:32px;
+  background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:rgba(251,252,252,.6);
+  cursor:pointer;
+  transition:color .25s ease;
+}
+.sb-close:hover{ color:var(--lime); }
+@media (min-width:1024px){ .sb-close{ display:none; } }
+
+.sb-nav{
+  flex:1;
+  overflow-y:auto;
+  padding:1rem .8rem;
+  scrollbar-width:thin;
+  scrollbar-color: rgba(99,253,2,.3) transparent;
+}
+.sb-nav::-webkit-scrollbar{ width:4px; }
+.sb-nav::-webkit-scrollbar-thumb{ background:rgba(99,253,2,.3); }
+
+.sb-group{
+  padding:.6rem .7rem .4rem;
+  font-size:.6rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(251,252,252,.28);
+}
+
+.sb-link{
+  position:relative;
+  display:flex; align-items:center; gap:.75rem;
+  width:100%;
+  padding:.7rem .8rem;
+  margin-bottom:.15rem;
+  font-size:.86rem;
+  font-weight:500;
+  color:rgba(251,252,252,.6);
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  text-align:left;
+  text-decoration:none;
+  font-family:inherit;
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  transition:color .25s ease, background .25s ease, transform .25s ease;
+  isolation:isolate;
+  overflow:hidden;
+}
+.sb-link::before{
+  content:''; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(90deg, rgba(99,253,2,.14), rgba(99,253,2,.02));
+  transform:translateX(-100%);
+  transition:transform .4s cubic-bezier(.22,1,.36,1);
+}
+.sb-link:hover{ color:#fbfcfc; transform:translateX(2px); }
+.sb-link:hover::before{ transform:translateX(0); }
+
+.sb-link.is-active{
+  color:var(--lime);
+  background:linear-gradient(90deg, rgba(99,253,2,.14), rgba(99,253,2,.02));
+  border-top:1px solid rgba(99,253,2,.22);
+  border-bottom:1px solid rgba(0,0,0,.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.sb-link.is-active::before{ transform:translateX(0); }
+.sb-link.is-active .sb-ico{
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  color:var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.2), 0 0 14px -2px rgba(99,253,2,.6);
+}
+
+.sb-ico{
+  flex:none;
+  display:grid; place-items:center;
+  width:30px; height:30px;
+  background:linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:rgba(251,252,252,.55);
+  transition:background .25s ease, color .25s ease;
+}
+
+.sb-badge-pill{
+  margin-left:auto;
+  font-size:.6rem;
+  font-weight:800;
+  padding:.15rem .45rem;
+  background:linear-gradient(180deg, #2a2a2a 0%, #151515 100%);
+  color:rgba(251,252,252,.6);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  letter-spacing:.06em;
+}
+.sb-badge-pill.is-lime{
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  color:var(--ink);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.2);
+}
+.sb-badge-pill.is-fire{
+  background:linear-gradient(180deg, #ff7a45 0%, #ff5722 100%);
+  color:#fff;
+  text-shadow:0 1px 0 rgba(0,0,0,.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.25);
+}
+
+.sb-foot{
+  padding:1rem .9rem;
+  border-top:1px solid rgba(255,255,255,.06);
+  flex:none;
+}
+.sb-user{
+  display:flex; align-items:center; gap:.75rem;
+  padding:.7rem .75rem;
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  margin-bottom:.8rem;
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+}
+.sb-avatar{
+  flex:none;
+  display:grid; place-items:center;
+  width:34px; height:34px;
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  color:var(--ink);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:.85rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.2);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+}
+.sb-user-text{ min-width:0; flex:1; }
+.sb-user-email{
+  font-size:.78rem;
+  font-weight:600;
+  color:#fbfcfc;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sb-user-role{
+  font-size:.62rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--lime);
+  font-weight:700;
+  margin-top:.15rem;
+}
+
+.main{
+  flex:1;
+  min-width:0;
+  margin-left:0;
+  display:flex;
+  flex-direction:column;
+  width:100%;
+}
+@media (min-width:1024px){
+  .main{ margin-left:var(--sidebar-w); width:auto; }
+}
+
+.topbar{
+  position:sticky; top:0;
+  z-index:40;
+  display:flex; align-items:center; gap:.6rem;
+  padding:.7rem .85rem;
+  background:rgba(1,1,1,.82);
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+@media (min-width:640px){ .topbar{ padding:.9rem 1.4rem; gap:.85rem; } }
+@media (min-width:1024px){ .topbar{ padding:1rem 2rem; gap:1rem; } }
+
+.tb-burger{
+  display:grid; place-items:center;
+  width:38px; height:38px;
+  background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:rgba(251,252,252,.8);
+  cursor:pointer;
+  transition:color .25s ease, transform .25s ease;
+  flex:none;
+}
+.tb-burger:hover{ color:var(--lime); }
+.tb-burger:active{ transform:scale(.94); }
+@media (min-width:1024px){ .tb-burger{ display:none; } }
+
+.tb-logo{
+  display:inline-flex; align-items:center; gap:.55rem;
+  text-decoration:none; color:inherit;
+  flex:none;
+  padding:.2rem .3rem;
+  transition:transform .3s cubic-bezier(.22,1,.36,1);
+}
+.tb-logo:hover{ transform:translateY(-1px); }
+.tb-logo-img{
+  display:block;
+  height:60px; width:auto;
+  filter: drop-shadow(0 3px 10px rgba(99,253,2,.28));
+  transition:filter .3s ease;
+}
+.tb-logo:hover .tb-logo-img{ filter: drop-shadow(0 4px 14px rgba(99,253,2,.5)); }
+@media (min-width:640px){ .tb-logo-img{ height:34px; } }
+@media (min-width:1024px){ .tb-logo-img{ height:60px; } }
+
+.tb-logo-fallback{
+  display:none;
+  place-items:center;
+  width:32px; height:32px;
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  color:var(--ink);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:.95rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(0,0,0,.2), 0 5px 14px -5px rgba(99,253,2,.6);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+}
+@media (min-width:640px){ .tb-logo-fallback{ width:34px; height:34px; font-size:1rem; } }
+
+.tb-logo-name{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:-.02em;
+  color:#fbfcfc;
+  white-space:nowrap;
+}
+@media (min-width:640px){ .tb-logo-name{ font-size:1.15rem; } }
+
+.tb-search{
+  position:relative;
+  flex:1;
+  max-width:420px;
+  display:none;
+  margin-left:.5rem;
+}
+@media (min-width:768px){ .tb-search{ display:block; } }
+.tb-search input{
+  width:100%;
+  padding:.65rem .85rem .65rem 2.4rem;
+  font-size:.85rem;
+  color:#fbfcfc;
+  background:linear-gradient(180deg, #050505 0%, #0d0d0d 100%);
+  border-top:1px solid #000;
+  border-left:1px solid #000;
+  border-right:1px solid rgba(255,255,255,.05);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.9);
+  outline:none;
+  transition:border-color .22s ease, box-shadow .22s ease;
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+}
+.tb-search input::placeholder{ color:rgba(251,252,252,.3); }
+.tb-search input:focus{
+  border-top-color:rgba(99,253,2,.4);
+  border-bottom-color:rgba(99,253,2,.5);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.9), 0 0 0 1px rgba(99,253,2,.15);
+}
+.tb-search svg{
+  position:absolute; left:.8rem; top:50%;
+  transform:translateY(-50%);
+  color:rgba(251,252,252,.4);
+  pointer-events:none;
+}
+
+.tb-spacer{ flex:1; }
+
+.tb-actions{
+  display:flex; align-items:center; gap:.4rem;
+}
+@media (min-width:640px){ .tb-actions{ gap:.55rem; } }
+
+.tb-icon-btn{
+  position:relative;
+  display:grid; place-items:center;
+  width:38px; height:38px;
+  background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:rgba(251,252,252,.65);
+  cursor:pointer;
+  transition:color .25s ease, transform .25s ease;
+  flex:none;
+}
+.tb-icon-btn:hover{ color:var(--lime); transform:translateY(-2px); }
+.tb-icon-btn .dot{
+  position:absolute; top:6px; right:6px;
+  width:7px; height:7px;
+  background:var(--lime);
+  box-shadow:0 0 8px var(--lime);
+}
+.tb-icon-btn .dot.is-fire{
+  background:var(--fire);
+  box-shadow:0 0 8px var(--fire);
+}
+@media (max-width:479px){
+  .tb-icon-btn.optional{ display:none; }
+}
+
+.tb-user{
+  display:flex; align-items:center; gap:.55rem;
+  padding:.3rem .65rem .3rem .3rem;
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  cursor:pointer;
+  transition:border-color .25s ease;
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+  font-family:inherit;
+}
+.tb-user:hover{ border-top-color:rgba(99,253,2,.3); }
+.tb-user-name{
+  display:none;
+  font-size:.8rem;
+  font-weight:600;
+  color:#fbfcfc;
+  max-width:140px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+@media (min-width:640px){ .tb-user-name{ display:block; } }
+
+.main-body{
+  flex:1;
+  padding:1.1rem .9rem 3rem;
+}
+@media (min-width:640px){ .main-body{ padding:1.4rem 1.4rem 3.5rem; } }
+@media (min-width:1024px){ .main-body{ padding:1.8rem 2rem 4rem; } }
+
+.view{ display:none; }
+.view.is-active{ display:block; animation:viewFade .45s cubic-bezier(.22,1,.36,1); }
+@keyframes viewFade{
+  from{ opacity:0; transform:translateY(12px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+.page-head{
+  display:flex; flex-direction:column; gap:1rem;
+  margin-bottom:1.3rem;
+}
+@media (min-width:768px){
+  .page-head{ flex-direction:row; align-items:flex-end; justify-content:space-between; gap:2rem; }
+}
+.page-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:1.5rem;
+  letter-spacing:-.025em;
+  line-height:1.1;
+  color:#fbfcfc;
+  text-shadow:0 2px 0 rgba(0,0,0,.6);
+}
+@media (min-width:768px){ .page-title{ font-size:1.9rem; } }
+@media (min-width:1024px){ .page-title{ font-size:2.2rem; } }
+.page-sub{
+  font-size:.86rem;
+  color:rgba(251,252,252,.5);
+  margin-top:.5rem;
+  line-height:1.6;
+}
+.page-actions{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+
+/* Ticker */
+.ticker{
+  position:relative;
+  margin-bottom:1.2rem;
+  overflow:hidden;
+  background:linear-gradient(180deg, #0c0c0c 0%, #060606 100%);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), inset 0 -1px 0 rgba(0,0,0,.9);
+  padding:.7rem 0;
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+}
+.ticker::before, .ticker::after{
+  content:''; position:absolute; top:0; bottom:0; width:50px; z-index:2; pointer-events:none;
+}
+.ticker::before{ left:0; background:linear-gradient(90deg, #010101 0%, transparent 100%); }
+.ticker::after{ right:0; background:linear-gradient(270deg, #010101 0%, transparent 100%); }
+.ticker-track{
+  display:flex; align-items:center; gap:2rem;
+  white-space:nowrap;
+  animation:tickerScroll 38s linear infinite;
+  will-change:transform;
+}
+@keyframes tickerScroll{
+  from{ transform:translate3d(0,0,0); }
+  to{ transform:translate3d(-50%,0,0); }
+}
+.ticker-item{
+  display:inline-flex; align-items:center; gap:.55rem;
+  font-size:.74rem;
+  font-weight:500;
+  color:rgba(251,252,252,.7);
+}
+.ticker-item .pulse{
+  width:6px; height:6px;
+  background:var(--lime);
+  box-shadow:0 0 8px var(--lime);
+  animation:pulseLive 1.8s ease-in-out infinite;
+}
+.ticker-item.is-fire .pulse{
+  background:var(--fire);
+  box-shadow:0 0 8px var(--fire);
+}
+@keyframes pulseLive{
+  0%,100%{ opacity:1; }
+  50%{ opacity:.3; }
+}
+.ticker-item strong{ color:#fbfcfc; }
+.ticker-item .val-lime{ color:var(--lime); font-weight:700; }
+.ticker-item .val-fire{ color:#ff7a45; font-weight:700; }
+
+.balance-hero{
+  position:relative;
+  overflow:hidden;
+  padding:1.6rem 1.3rem 1.5rem;
+  margin-bottom:1.2rem;
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(99,253,2,.16), transparent 55%),
+    radial-gradient(120% 100% at 100% 100%, rgba(99,253,2,.08), transparent 60%),
+    linear-gradient(180deg, #141414 0%, #070707 100%);
+  border-top:1px solid rgba(99,253,2,.32);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.9);
+  border-bottom:1px solid rgba(0,0,0,.98);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 30px 60px -30px rgba(0,0,0,.95);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  isolation:isolate;
+}
+@media (min-width:640px){ .balance-hero{ padding:2.1rem 2rem 2rem; } }
+@media (min-width:1024px){ .balance-hero{ padding:2.4rem 2.4rem 2.2rem; } }
+.balance-hero::after{
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.4;
+  background:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.012) 0px,
+    rgba(255,255,255,.012) 1px,
+    transparent 1px,
+    transparent 3px);
+}
+.balance-row{
+  display:flex; flex-direction:column; gap:1.2rem;
+  position:relative; z-index:1;
+}
+@media (min-width:768px){
+  .balance-row{ flex-direction:row; align-items:center; justify-content:space-between; gap:2rem; }
+}
+.balance-label{
+  font-size:.66rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(251,252,252,.42);
+  margin-bottom:.7rem;
+}
+.balance-amount{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:2.4rem;
+  letter-spacing:-.04em;
+  line-height:1;
+  color:#fbfcfc;
+  text-shadow:0 3px 0 rgba(0,0,0,.6);
+}
+@media (min-width:640px){ .balance-amount{ font-size:3.2rem; } }
+@media (min-width:1024px){ .balance-amount{ font-size:3.6rem; } }
+.balance-amount .accent{ color:var(--lime); text-shadow: 0 0 30px rgba(99,253,2,.5), 0 3px 0 rgba(0,0,0,.6); }
+.balance-meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:.6rem .9rem;
+  margin-top:.9rem;
+  font-size:.76rem;
+  color:rgba(251,252,252,.5);
+}
+.balance-meta .delta{
+  display:inline-flex; align-items:center; gap:.25rem;
+  font-weight:700;
+}
+.balance-meta .delta.is-up{ color:var(--lime); }
+.balance-actions{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+
+.qa-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:.6rem;
+  margin-bottom:1.2rem;
+}
+@media (min-width:640px){ .qa-grid{ grid-template-columns:repeat(4, 1fr); gap:.85rem; } }
+
+.qa{
+  position:relative;
+  display:flex; flex-direction:column;
+  gap:.55rem;
+  padding:1rem;
+  overflow:hidden;
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.85);
+  border-bottom:1px solid rgba(0,0,0,.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  cursor:pointer;
+  transition:transform .35s cubic-bezier(.22,1,.36,1), border-color .3s ease;
+  isolation:isolate;
+  text-align:left;
+  color:inherit;
+  font-family:inherit;
+}
+.qa::before{
+  content:''; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(180deg, rgba(99,253,2,.10), rgba(99,253,2,.02));
+  opacity:0;
+  transition:opacity .35s ease;
+}
+.qa:hover{ transform:translateY(-3px); }
+.qa:hover::before{ opacity:1; }
+.qa-ico{
+  display:grid; place-items:center;
+  width:36px; height:36px;
+  background:linear-gradient(180deg, #1f1f1f 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(99,253,2,.28);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.qa-name{ font-size:.82rem; font-weight:600; color:#fbfcfc; line-height:1.25; }
+.qa-desc{ font-size:.68rem; color:rgba(251,252,252,.4); margin-top:.1rem; }
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.7rem;
+  margin-bottom:1.2rem;
+}
+@media (min-width:768px){ .stats{ grid-template-columns:repeat(4, 1fr); gap:1rem; } }
+
+.stat{
+  position:relative;
+  padding:1rem .95rem 1.05rem;
+  overflow:hidden;
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.85);
+  border-bottom:1px solid rgba(0,0,0,.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 36px -20px rgba(0,0,0,.9);
+  transition:transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease;
+  isolation:isolate;
+}
+@media (min-width:640px){ .stat{ padding:1.25rem 1.15rem 1.3rem; } }
+.stat:hover{
+  transform:translateY(-5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 26px 52px -26px rgba(99,253,2,.28),
+    0 18px 36px -20px rgba(0,0,0,.9);
+}
+.stat-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem; }
+.stat-label{
+  font-size:.6rem; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:rgba(251,252,252,.42);
+}
+.stat-ico{
+  display:grid; place-items:center;
+  width:28px; height:28px;
+  background:linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(99,253,2,.28);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  flex:none;
+}
+.stat-value{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:1.4rem;
+  letter-spacing:-.03em;
+  line-height:1;
+  color:#fbfcfc;
+  text-shadow:0 2px 0 rgba(0,0,0,.6);
+}
+@media (min-width:640px){ .stat-value{ font-size:1.7rem; } }
+.stat-value .accent{ color:var(--lime); text-shadow:0 0 16px rgba(99,253,2,.35), 0 2px 0 rgba(0,0,0,.6); }
+.stat-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:.7rem;
+  padding-top:.65rem;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.stat-delta{
+  display:inline-flex; align-items:center; gap:.25rem;
+  font-size:.64rem; font-weight:700;
+}
+.stat-delta.is-up{ color:var(--lime); }
+.stat-delta.is-down{ color:#ff7a45; }
+.stat-period{ font-size:.6rem; color:rgba(251,252,252,.35); }
+
+.dash-grid{ display:grid; grid-template-columns:1fr; gap:1rem; }
+@media (min-width:1024px){
+  .dash-grid{ grid-template-columns:minmax(0, 2fr) minmax(0, 1fr); gap:1.15rem; }
+}
+
+.card-head{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:1rem 1.1rem;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  position:relative; z-index:1;
+  flex-wrap:wrap;
+}
+@media (min-width:640px){ .card-head{ padding:1.15rem 1.3rem; } }
+.card-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700; font-size:1rem; letter-spacing:-.01em; color:#fbfcfc;
+}
+.card-sub{
+  font-size:.74rem; color:rgba(251,252,252,.4); margin-top:.25rem;
+}
+.card-body{
+  padding:1rem 1.1rem 1.2rem;
+  position:relative; z-index:1;
+}
+@media (min-width:640px){ .card-body{ padding:1.15rem 1.3rem 1.4rem; } }
+
+.card-tabs{
+  display:flex; gap:.3rem;
+  padding:.7rem 1.1rem;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  overflow-x:auto; scrollbar-width:none;
+  position:relative; z-index:1;
+}
+.card-tabs::-webkit-scrollbar{ display:none; }
+@media (min-width:640px){ .card-tabs{ padding:.85rem 1.3rem; } }
+
+.card-tab{
+  flex:none;
+  padding:.42rem .8rem;
+  font-size:.66rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+  color:rgba(251,252,252,.5);
+  background:linear-gradient(180deg, #141414 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  cursor:pointer;
+  transition:color .3s ease, background .3s ease, transform .3s ease;
+  clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
+  font-family:inherit;
+}
+.card-tab:hover{ color:#fbfcfc; transform:translateY(-1px); }
+.card-tab.is-active{
+  color:var(--ink);
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.2);
+}
+
+.chart-wrap{
+  position:relative; width:100%; height:200px;
+}
+@media (min-width:640px){ .chart-wrap{ height:240px; } }
+.chart-wrap svg{ width:100%; height:100%; display:block; overflow:visible; }
+
+.chart-legend{
+  display:flex; flex-wrap:wrap; gap:.85rem 1.2rem;
+  margin-top:1rem; padding-top:.9rem;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.legend-item{
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.74rem; color:rgba(251,252,252,.55);
+  flex:1; min-width:130px;
+}
+.legend-dot{ width:8px; height:8px; flex:none; }
+.legend-dot.is-lime{ background:var(--lime); box-shadow:0 0 8px rgba(99,253,2,.6); }
+.legend-dot.is-dim{ background:rgba(251,252,252,.35); }
+.legend-dot.is-fire{ background:var(--fire); box-shadow:0 0 8px rgba(255,87,34,.6); }
+.legend-value{
+  margin-left:auto;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  color:#fbfcfc;
+  font-size:.8rem;
+}
+
+.tbl-scroll{
+  overflow-x:auto;
+  scrollbar-width:thin;
+  scrollbar-color: rgba(99,253,2,.3) transparent;
+}
+.tbl-scroll::-webkit-scrollbar{ height:6px; }
+.tbl-scroll::-webkit-scrollbar-thumb{ background:rgba(99,253,2,.3); }
+
+.tbl{ width:100%; min-width:560px; border-collapse:collapse; }
+.tbl th{
+  padding:.65rem 1rem;
+  text-align:left;
+  font-size:.6rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase;
+  color:rgba(251,252,252,.38);
+  background:linear-gradient(180deg, #0c0c0c 0%, #060606 100%);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  white-space:nowrap;
+}
+.tbl td{
+  padding:.8rem 1rem;
+  font-size:.84rem;
+  color:rgba(251,252,252,.72);
+  border-bottom:1px solid rgba(255,255,255,.04);
+  white-space:nowrap;
+}
+.tbl tbody tr{ transition:background .25s ease; }
+.tbl tbody tr:hover{ background:rgba(99,253,2,.035); }
+.tbl tbody tr:last-child td{ border-bottom:0; }
+
+.tbl-status{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.28rem .6rem;
+  font-size:.6rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(0,0,0,.9);
+}
+.tbl-status::before{
+  content:''; width:5px; height:5px;
+  background:currentColor;
+  box-shadow:0 0 8px currentColor;
+}
+.tbl-status.is-active{ color:var(--lime); background:rgba(99,253,2,.08); border-top-color:rgba(99,253,2,.3); }
+.tbl-status.is-pending{ color:#ffd84a; background:rgba(255,216,74,.08); border-top-color:rgba(255,216,74,.3); }
+.tbl-status.is-failed{ color:#ff5252; background:rgba(255,82,82,.08); border-top-color:rgba(255,82,82,.3); }
+
+.tbl-amount{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  color:#fbfcfc;
+  font-size:.88rem;
+}
+.tbl-amount.is-lime{ color:var(--lime); }
+.tbl-amount.is-fire{ color:#ff7a45; }
+
+.tbl-action{
+  display:inline-grid; place-items:center;
+  width:28px; height:28px;
+  background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:rgba(251,252,252,.5);
+  cursor:pointer;
+  transition:color .25s ease, transform .25s ease;
+}
+.tbl-action:hover{ color:var(--lime); transform:translateY(-1px); }
+
+.feed{ display:flex; flex-direction:column; }
+.feed-item{
+  position:relative;
+  display:flex; gap:.85rem;
+  padding:1rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.feed-item:last-child{ border-bottom:0; padding-bottom:0; }
+.feed-item:first-child{ padding-top:0; }
+.feed-ico{
+  flex:none;
+  display:grid; place-items:center;
+  width:32px; height:32px;
+  background:linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(99,253,2,.22);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%, 0 18%);
+}
+.feed-ico.is-fire{ border-top-color:rgba(255,87,34,.4); color:#ff7a45; }
+.feed-ico.is-neutral{ border-top-color:rgba(255,255,255,.1); color:rgba(251,252,252,.6); }
+.feed-text{
+  flex:1; min-width:0;
+  font-size:.82rem; line-height:1.55;
+  color:rgba(251,252,252,.7);
+}
+.feed-text strong{ color:#fbfcfc; font-weight:600; }
+.feed-text .val-lime{ color:var(--lime); font-weight:700; }
+.feed-text .val-fire{ color:#ff7a45; font-weight:700; }
+.feed-time{ font-size:.66rem; color:rgba(251,252,252,.35); margin-top:.35rem; }
+
+.cards-grid{
+  display:grid; grid-template-columns:1fr; gap:1rem;
+}
+@media (min-width:768px){ .cards-grid{ grid-template-columns:1fr 1fr; } }
+
+.credit-card{
+  position:relative;
+  overflow:hidden;
+  aspect-ratio:1.586 / 1;
+  padding:1.4rem 1.35rem;
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(99,253,2,.18), transparent 55%),
+    linear-gradient(135deg, #1c1c1c 0%, #0a0a0a 60%, #050505 100%);
+  border-top:1px solid rgba(255,255,255,.1);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.9);
+  border-bottom:1px solid rgba(0,0,0,.98);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 30px 60px -30px rgba(0,0,0,.95);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  display:flex; flex-direction:column; justify-content:space-between;
+  isolation:isolate;
+}
+.credit-card::after{
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.4;
+  background:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.012) 0px,
+    rgba(255,255,255,.012) 1px,
+    transparent 1px,
+    transparent 3px);
+}
+.credit-card.is-virtual{
+  background:
+    radial-gradient(120% 100% at 0% 100%, rgba(99,253,2,.14), transparent 60%),
+    linear-gradient(135deg, #0f0f0f 0%, #080808 50%, #050505 100%);
+  border-top-color:rgba(99,253,2,.35);
+}
+.cc-top{
+  position:relative; z-index:1;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;
+}
+.cc-brand{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:1.02rem;
+  letter-spacing:-.01em;
+  color:#fbfcfc;
+}
+.cc-type{
+  font-size:.6rem;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--lime);
+  padding:.3rem .6rem;
+  background:rgba(99,253,2,.1);
+  border-top:1px solid rgba(99,253,2,.35);
+  border-bottom:1px solid rgba(0,0,0,.7);
+  text-shadow:0 0 12px rgba(99,253,2,.5);
+}
+.cc-chip{
+  width:34px; height:26px;
+  background:linear-gradient(135deg, #63fd02 0%, #3b9c00 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 0 rgba(0,0,0,.3);
+  position:relative;
+  margin-bottom:1rem;
+}
+.cc-chip::after{
+  content:''; position:absolute; inset:4px;
+  background:
+    linear-gradient(90deg, transparent 45%, rgba(0,0,0,.5) 45%, rgba(0,0,0,.5) 55%, transparent 55%),
+    linear-gradient(180deg, transparent 45%, rgba(0,0,0,.5) 45%, rgba(0,0,0,.5) 55%, transparent 55%);
+}
+.cc-number{
+  position:relative; z-index:1;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;
+  font-size:1.05rem;
+  letter-spacing:.12em;
+  color:#fbfcfc;
+  text-shadow:0 1px 0 rgba(0,0,0,.7);
+}
+@media (min-width:640px){ .cc-number{ font-size:1.2rem; } }
+.cc-number .dots{ color:rgba(251,252,252,.5); letter-spacing:.2em; }
+.cc-bottom{
+  position:relative; z-index:1;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  margin-top:1rem;
+}
+.cc-label{
+  font-size:.56rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase;
+  color:rgba(251,252,252,.4);
+  margin-bottom:.25rem;
+}
+.cc-value{ font-size:.82rem; font-weight:600; color:#fbfcfc; letter-spacing:.02em; }
+.cc-logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:.9rem;
+  color:rgba(251,252,252,.75);
+  letter-spacing:-.01em;
+}
+
+.recip-grid{
+  display:grid; grid-template-columns:1fr; gap:.6rem;
+}
+@media (min-width:640px){ .recip-grid{ grid-template-columns:1fr 1fr; gap:.8rem; } }
+@media (min-width:1024px){ .recip-grid{ grid-template-columns:repeat(3, 1fr); } }
+
+.recip{
+  display:flex; align-items:center; gap:.85rem;
+  padding:1rem 1rem;
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.85);
+  border-bottom:1px solid rgba(0,0,0,.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  transition:transform .35s cubic-bezier(.22,1,.36,1), border-color .3s ease;
+  cursor:pointer;
+}
+.recip:hover{
+  transform:translateY(-3px);
+  border-top-color:rgba(99,253,2,.35);
+}
+.recip-avatar{
+  flex:none;
+  display:grid; place-items:center;
+  width:42px; height:42px;
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  color:var(--ink);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:.92rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.2);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+}
+.recip-avatar.is-dark{
+  background:linear-gradient(180deg, #1f1f1f 0%, #0d0d0d 100%);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -2px 0 rgba(0,0,0,.7);
+}
+.recip-info{ min-width:0; flex:1; }
+.recip-name{
+  font-size:.88rem; font-weight:600; color:#fbfcfc;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.recip-meta{
+  font-size:.7rem; color:rgba(251,252,252,.4); margin-top:.2rem;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* REPORTS / STATEMENTS (FIX)                              */
+/* ═══════════════════════════════════════════════════════ */
+.reports-list{ display:flex; flex-direction:column; }
+
+.report-row{
+  display:flex; align-items:center; gap:.9rem;
+  padding:1.15rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  flex-wrap:wrap;
+  transition:background .25s ease;
+}
+.report-row:last-child{ border-bottom:0; padding-bottom:0; }
+.report-row:first-child{ padding-top:.1rem; }
+
+.report-icon{
+  flex:none;
+  display:grid; place-items:center;
+  width:44px; height:44px;
+  background:linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(99,253,2,.28);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+}
+
+.report-info{ flex:1; min-width:180px; }
+.report-name{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.92rem;
+  font-weight:700;
+  color:#fbfcfc;
+  letter-spacing:-.005em;
+  line-height:1.3;
+}
+.report-meta{
+  font-size:.72rem;
+  color:rgba(251,252,252,.42);
+  margin-top:.35rem;
+  line-height:1.5;
+}
+
+.report-actions{
+  display:flex; gap:.4rem; flex:none;
+}
+.report-actions button{
+  display:grid; place-items:center;
+  width:34px; height:34px;
+  background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border-top:1px solid rgba(255,255,255,.07);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:rgba(251,252,252,.55);
+  cursor:pointer;
+  transition:color .25s ease, transform .25s ease, border-color .25s ease;
+  font-family:inherit;
+}
+.report-actions button:hover{
+  color:var(--lime);
+  transform:translateY(-1px);
+  border-top-color:rgba(99,253,2,.4);
+}
+
+/* Responsive tweak for statements rows on mobile */
+@media (max-width:520px){
+  .report-row{ gap:.75rem; }
+  .report-icon{ width:38px; height:38px; }
+  .report-info{ min-width:0; }
+  .report-actions{ width:100%; justify-content:flex-end; }
+}
+
+/* Settings form */
+.settings-grid{
+  display:grid; grid-template-columns:1fr; gap:1rem;
+}
+@media (min-width:768px){ .settings-grid{ grid-template-columns:1fr 1fr; } }
+
+.form-field{ position:relative; }
+.form-label-s{
+  display:block;
+  font-size:.68rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+  color:rgba(251,252,252,.5);
+  margin-bottom:.5rem;
+}
+.form-label-s .req{ color:var(--red); margin-left:.15rem; }
+
+.form-input{
+  display:block; width:100%;
+  padding:.8rem .95rem;
+  font-family:inherit; font-size:.88rem; color:#fbfcfc;
+  background:linear-gradient(180deg, #050505 0%, #0d0d0d 100%);
+  border-top:1px solid #000;
+  border-left:1px solid #000;
+  border-right:1px solid rgba(255,255,255,.05);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.9);
+  outline:none;
+  transition:border-color .22s ease, box-shadow .22s ease;
+}
+.form-input::placeholder{ color:rgba(251,252,252,.24); }
+.form-input:focus{
+  border-top-color:rgba(99,253,2,.4);
+  border-left-color:rgba(99,253,2,.3);
+  border-bottom-color:rgba(99,253,2,.5);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.95),
+    0 0 0 1px rgba(99,253,2,.18);
+}
+select.form-input{
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2363fd02' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right .95rem center;
+  padding-right:2.6rem;
+  cursor:pointer;
+}
+select.form-input option{ background:#0a0a0a; color:#fbfcfc; }
+
+.field-error{
+  display:block;
+  font-size:.72rem;
+  font-weight:500;
+  color:var(--red);
+  margin-top:.42rem;
+  max-height:0; opacity:0; overflow:hidden;
+  transition:max-height .28s ease, opacity .28s ease;
+  text-shadow:0 0 12px rgba(255,77,77,.25);
+}
+.form-field.has-error .form-input{
+  border-top-color:rgba(255,77,77,.75);
+  border-left-color:rgba(255,77,77,.6);
+  border-bottom-color:rgba(255,77,77,.75);
+  background:linear-gradient(180deg, #0d0303 0%, #140505 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.95),
+    0 0 0 1px rgba(255,77,77,.22);
+}
+.form-field.has-error .field-error{ max-height:44px; opacity:1; }
+.form-field.has-error .form-label-s{ color:rgba(255,77,77,.9); }
+.form-field.shake{ animation:fieldShake .42s cubic-bezier(.36,.07,.19,.97); }
+@keyframes fieldShake{
+  10%,90%{ transform:translateX(-1px); }
+  20%,80%{ transform:translateX(2px); }
+  30%,50%,70%{ transform:translateX(-4px); }
+  40%,60%{ transform:translateX(4px); }
+}
+
+.switch-row{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.switch-row:last-child{ border-bottom:0; }
+.switch-info{ min-width:0; }
+.switch-title{ font-size:.86rem; font-weight:600; color:#fbfcfc; }
+.switch-desc{ font-size:.72rem; color:rgba(251,252,252,.42); margin-top:.2rem; line-height:1.5; }
+.switch{
+  position:relative;
+  width:44px; height:24px;
+  flex:none;
+  background:linear-gradient(180deg, #050505 0%, #0d0d0d 100%);
+  border-top:1px solid #000;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.9);
+  cursor:pointer;
+  transition:background .3s ease;
+}
+.switch::after{
+  content:'';
+  position:absolute; top:3px; left:3px;
+  width:16px; height:16px;
+  background:linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,.8);
+  transition:transform .35s cubic-bezier(.22,1,.36,1), background .3s ease;
+}
+.switch.is-on{
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(0,0,0,.2), 0 0 12px -2px rgba(99,253,2,.6);
+}
+.switch.is-on::after{
+  transform:translateX(20px);
+  background:linear-gradient(180deg, #fbfcfc 0%, #d8d8d8 100%);
+}
+
+.img-link{
+  display:block; overflow:hidden;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.9);
+  border-bottom:1px solid rgba(0,0,0,.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 30px 60px -30px rgba(0,0,0,.95);
+  transition:transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s ease;
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  will-change:transform;
+}
+.img-link:hover{
+  transform:translateY(-6px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 40px 80px -40px rgba(99,253,2,.4),
+    0 30px 60px -30px rgba(0,0,0,.95);
+}
+.img-link img{
+  display:block; width:100%; height:auto;
+  transition:transform .9s cubic-bezier(.22,1,.36,1), filter .6s ease;
+  filter:saturate(.92) contrast(1.02);
+}
+.img-link:hover img{ transform:scale(1.03); filter:saturate(1.08) contrast(1.05); }
+
+.bar-list{ display:flex; flex-direction:column; gap:.85rem; }
+.bar-row{ display:flex; align-items:center; gap:.75rem; }
+.bar-label{
+  flex:none; width:96px;
+  font-size:.72rem;
+  color:rgba(251,252,252,.6);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+@media (min-width:640px){ .bar-label{ width:130px; font-size:.78rem; } }
+.bar-track{
+  flex:1;
+  height:8px;
+  background:linear-gradient(180deg, #050505 0%, #0d0d0d 100%);
+  border-top:1px solid #000;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.9);
+  overflow:hidden;
+  position:relative;
+}
+.bar-fill{
+  position:absolute; left:0; top:0; bottom:0;
+  background:linear-gradient(180deg, var(--lime-hi) 0%, var(--lime) 50%, var(--lime-lo) 100%);
+  box-shadow: 0 0 12px -2px rgba(99,253,2,.6), inset 0 1px 0 rgba(255,255,255,.5);
+  transition:width 1.2s cubic-bezier(.22,1,.36,1);
+}
+.bar-value{
+  flex:none;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;
+  font-size:.76rem;
+  color:#fbfcfc;
+  min-width:44px;
+  text-align:right;
+}
+
+.help-grid{
+  display:grid; grid-template-columns:1fr; gap:.7rem;
+}
+@media (min-width:640px){ .help-grid{ grid-template-columns:1fr 1fr; gap:.9rem; } }
+.help-card{
+  display:flex; align-items:flex-start; gap:.9rem;
+  padding:1.1rem 1.1rem;
+  background:linear-gradient(180deg, #131313 0%, #080808 100%);
+  border-top:1px solid rgba(255,255,255,.08);
+  border-left:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(0,0,0,.85);
+  border-bottom:1px solid rgba(0,0,0,.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(var(--chamfer) 0, 100% 0, 100% 100%, 0 100%, 0 var(--chamfer));
+  transition:transform .35s cubic-bezier(.22,1,.36,1), border-color .3s ease;
+  cursor:pointer;
+  text-decoration:none; color:inherit;
+}
+.help-card:hover{
+  transform:translateY(-3px);
+  border-top-color:rgba(99,253,2,.35);
+}
+.help-icon{
+  flex:none;
+  display:grid; place-items:center;
+  width:36px; height:36px;
+  background:linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(99,253,2,.25);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+}
+.help-info{ flex:1; }
+.help-title{ font-size:.88rem; font-weight:600; color:#fbfcfc; }
+.help-desc{ font-size:.74rem; color:rgba(251,252,252,.5); margin-top:.3rem; line-height:1.55; }
+
+.sec-list{ display:flex; flex-direction:column; }
+.sec-row{
+  display:flex; align-items:center; gap:1rem;
+  padding:1rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  flex-wrap:wrap;
+}
+.sec-row:last-child{ border-bottom:0; padding-bottom:0; }
+.sec-row:first-child{ padding-top:0; }
+.sec-icon{
+  flex:none;
+  display:grid; place-items:center;
+  width:40px; height:40px;
+  background:linear-gradient(180deg, #1c1c1c 0%, #0d0d0d 100%);
+  border-top:1px solid rgba(99,253,2,.25);
+  border-bottom:1px solid rgba(0,0,0,.9);
+  color:var(--lime);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 20%);
+}
+.sec-info{ flex:1; min-width:180px; }
+.sec-title{ font-size:.88rem; font-weight:600; color:#fbfcfc; }
+.sec-desc{ font-size:.72rem; color:rgba(251,252,252,.42); margin-top:.25rem; line-height:1.55; }
+
+.scroll-progress{
+  position:fixed; top:0; left:0; right:0; height:2px; z-index:9999;
+  background:linear-gradient(90deg, var(--lime) 0%, var(--lime-hi) 50%, var(--lime) 100%);
+  transform-origin:0% 50%; transform:scaleX(0);
+  box-shadow:0 0 14px rgba(99,253,2,.7);
+  pointer-events:none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ scroll-behavior:auto !important; }
+  .btn-tab::before{ transition:transform .01ms; }
+  .ticker-track{ animation-duration:80s; }
+}
+</style>
+<style>
+  .view[data-view="profile"] .form-label-s .req {
+    color: var(--red, #ff4d4d);
+    margin-left: 0.15rem;
+  }
+  .view[data-view="profile"] .form-field {
+    position: relative;
+    min-width: 0;
+  }
+  .view[data-view="profile"] .field-error {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--red, #ff4d4d);
+    margin-top: 0.42rem;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-height 0.28s ease,
+      opacity 0.28s ease;
+    text-shadow: 0 0 12px rgba(255, 77, 77, 0.25);
+  }
+  .view[data-view="profile"] .form-field.has-error .field-error {
+    max-height: 60px;
+    opacity: 1;
+  }
+  .view[data-view="profile"] .form-field.has-error .form-input {
+    border-top-color: rgba(255, 77, 77, 0.75);
+    border-left-color: rgba(255, 77, 77, 0.6);
+    border-bottom-color: rgba(255, 77, 77, 0.75);
+    background: linear-gradient(180deg, #0d0303 0%, #140505 100%);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(255, 77, 77, 0.22),
+      0 0 24px -8px rgba(255, 77, 77, 0.4);
+  }
+  .view[data-view="profile"] .form-field.has-error .form-label-s {
+    color: rgba(255, 77, 77, 0.9);
+  }
+  .view[data-view="profile"] .form-field.shake {
+    animation: pfFieldShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+  @keyframes pfFieldShake {
+    10%,
+    90% {
+      transform: translateX(-1px);
+    }
+    20%,
+    80% {
+      transform: translateX(2px);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translateX(-4px);
+    }
+    40%,
+    60% {
+      transform: translateX(4px);
+    }
+  }
+  /* Placeholder colour for the empty <option> */
+  .view[data-view="profile"] select.form-input:invalid,
+  .view[data-view="profile"] select.form-input option[value=""] {
+    color: rgba(251, 252, 252, 0.35);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .view[data-view="profile"] .form-field.shake {
+      animation: none;
+    }
+  }
+</style>
+<!-- ═══════════════════════════════════════════════════════
+     Send form validation (scoped to this view only)
+     ═══════════════════════════════════════════════════════ -->
+<style>
+  .view[data-view="send"] .form-label-s .req {
+    color: var(--red, #ff4d4d);
+    margin-left: 0.15rem;
+  }
+  .view[data-view="send"] .form-field {
+    position: relative;
+    min-width: 0;
+  }
+  .view[data-view="send"] .field-error {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--red, #ff4d4d);
+    margin-top: 0.42rem;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-height 0.28s ease,
+      opacity 0.28s ease;
+    text-shadow: 0 0 12px rgba(255, 77, 77, 0.25);
+  }
+  .view[data-view="send"] .form-field.has-error .field-error {
+    max-height: 60px;
+    opacity: 1;
+  }
+  .view[data-view="send"] .form-field.has-error .form-input {
+    border-top-color: rgba(255, 77, 77, 0.75);
+    border-left-color: rgba(255, 77, 77, 0.6);
+    border-bottom-color: rgba(255, 77, 77, 0.75);
+    background: linear-gradient(180deg, #0d0303 0%, #140505 100%);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(255, 77, 77, 0.22),
+      0 0 24px -8px rgba(255, 77, 77, 0.4);
+  }
+  .view[data-view="send"] .form-field.has-error .form-label-s {
+    color: rgba(255, 77, 77, 0.9);
+  }
+  .view[data-view="send"] .form-field.shake {
+    animation: sendFieldShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+  @keyframes sendFieldShake {
+    10%,
+    90% {
+      transform: translateX(-1px);
+    }
+    20%,
+    80% {
+      transform: translateX(2px);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translateX(-4px);
+    }
+    40%,
+    60% {
+      transform: translateX(4px);
+    }
+  }
+  /* Dim the placeholder option so it reads as an empty state */
+  .view[data-view="send"] select.form-input option[value=""] {
+    color: rgba(251, 252, 252, 0.35);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .view[data-view="send"] .form-field.shake {
+      animation: none;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<div class="dash">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sb-head">
+      <span class="sb-head-title">Menu</span>
+      <button class="sb-close" id="sbClose" aria-label="Close menu" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <nav class="sb-nav">
+
+      <p class="sb-group">Overview</p>
+      <button type="button" class="sb-link is-active" data-nav="dashboard">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+        Dashboard
+      </button>
+      <button type="button" class="sb-link" data-nav="wallet">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 010-4h12v4"/><path d="M4 6v12a2 2 0 002 2h14v-4"/><path d="M18 12a2 2 0 000 4h4v-4z"/></svg></span>
+        Wallet
+        <span class="sb-badge-pill is-lime">$</span>
+      </button>
+      <button type="button" class="sb-link" data-nav="statements">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        Statements
+      </button>
+
+      <p class="sb-group">Payments</p>
+      <button type="button" class="sb-link" data-nav="send">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+        Send money
+      </button>
+      <button type="button" class="sb-link" data-nav="transactions">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6H4zM4 14h16v6H4z"/><path d="M8 8h.01M8 18h.01"/></svg></span>
+        Transactions
+        <span class="sb-badge-pill">24</span>
+      </button>
+      <button type="button" class="sb-link" data-nav="cards">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="0"/><path d="M2 10h20"/></svg></span>
+        My cards
+      </button>
+      <button type="button" class="sb-link" data-nav="recipients">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span>
+        Recipients
+      </button>
+
+      <p class="sb-group">Account</p>
+      <button type="button" class="sb-link" data-nav="profile">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        Profile
+      </button>
+      <button type="button" class="sb-link" data-nav="security">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        Security
+      </button>
+      <button type="button" class="sb-link" data-nav="settings">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
+        Settings
+      </button>
+
+      <p class="sb-group">Support</p>
+      <button type="button" class="sb-link" data-nav="help">
+        <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg></span>
+        Help center
+      </button>
+
+    </nav>
+
+    <div class="sb-foot">
+      <div class="sb-user">
+        <span class="sb-avatar" id="sbAvatar">U</span>
+        <div class="sb-user-text">
+          <p class="sb-user-email" id="sbEmail">user@stackly.com</p>
+          <p class="sb-user-role" id="sbRole">User</p>
+        </div>
+      </div>
+      <button type="button" id="logoutBtn" class="btn-tab btn-tab--danger btn-tab--full">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign out
+      </button>
+    </div>
+
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <header class="topbar">
+
+      <button class="tb-burger" id="tbBurger" aria-label="Open menu" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+      </button>
+
+      <a href="user.html" class="tb-logo" aria-label="Stackly home">
+        <img
+          class="tb-logo-img"
+          src="./assets/logo.webp"
+          alt="Stackly"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+        />
+        <!-- <span class="tb-logo-fallback">S</span>
+        <span class="tb-logo-name">Stackly</span> -->
+      </a>
+
+      <div class="tb-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search transactions, recipients…" id="globalSearch" />
+      </div>
+
+      <div class="tb-spacer"></div>
+
+      <div class="tb-actions">
+        <button class="tb-icon-btn optional" title="Refresh" id="refreshBtn" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+        </button>
+        <button class="tb-icon-btn optional" title="Notifications" type="button" data-to-404>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <button class="tb-icon-btn" title="Alerts" type="button" data-to-404>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+          <span class="dot is-fire"></span>
+        </button>
+        <button class="tb-user" type="button" data-to-404>
+          <span class="sb-avatar" style="width:28px;height:28px;font-size:.7rem" id="tbAvatar">U</span>
+          <span class="tb-user-name" id="tbEmail">user@stackly.com</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="main-body">
+
+      <!-- ═══════ VIEW — DASHBOARD ═══════ -->
+      <section class="view is-active" data-view="dashboard">
+
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">My Account</span>
+            <h1 class="page-title mt-4">Welcome back, <span class="text-lime" id="userName">User</span>.</h1>
+            <p class="page-sub">Here's a snapshot of your account.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-tab btn-tab--ghost" type="button" data-to-404"  onclick="window.location.href='./404.html'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+              Statement
+            </button>
+            <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add money
+            </button>
+          </div>
+        </div>
+
+        <div class="ticker">
+          <div class="ticker-track">
+            <span class="ticker-item"><span class="pulse"></span> <strong>Payment received</strong> · Acme Corp · <span class="val-lime">+$2,480</span></span>
+            <span class="ticker-item"><span class="pulse"></span> <strong>Transfer to</strong> · Sara Lin · <span class="val-fire">-$340</span></span>
+            <span class="ticker-item"><span class="pulse"></span> <strong>Card payment</strong> · Amazon · <span class="val-fire">-$89</span></span>
+            <span class="ticker-item is-fire"><span class="pulse"></span> <strong>Low balance warning</strong> on card ending 4821</span>
+            <span class="ticker-item"><span class="pulse"></span> <strong>Payment received</strong> · Nova Labs · <span class="val-lime">+$1,120</span></span>
+            <span class="ticker-item"><span class="pulse"></span> <strong>Cashback credited</strong> · <span class="val-lime">+$24.80</span></span>
+            <span class="ticker-item" aria-hidden="true"><span class="pulse"></span> <strong>Payment received</strong> · Acme Corp · <span class="val-lime">+$2,480</span></span>
+            <span class="ticker-item" aria-hidden="true"><span class="pulse"></span> <strong>Transfer to</strong> · Sara Lin · <span class="val-fire">-$340</span></span>
+            <span class="ticker-item" aria-hidden="true"><span class="pulse"></span> <strong>Card payment</strong> · Amazon · <span class="val-fire">-$89</span></span>
+            <span class="ticker-item is-fire" aria-hidden="true"><span class="pulse"></span> <strong>Low balance warning</strong> on card ending 4821</span>
+          </div>
+        </div>
+
+        <div class="balance-hero">
+          <div class="balance-row">
+            <div>
+              <p class="balance-label">Total balance</p>
+              <p class="balance-amount">$<span data-count="12480.50" data-decimals="2">0</span></p>
+              <div class="balance-meta">
+                <span class="delta is-up">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>
+                  +8.4% this month
+                </span>
+                <span>·</span>
+                <span>Available: $12,480.50</span>
+                <span>·</span>
+                <span>Updated just now</span>
+              </div>
+            </div>
+            <div class="balance-actions">
+              <button class="btn-tab btn-tab--lime" type="button" data-to-404" onclick="window.location.href='./404.html'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                Send money
+              </button>
+              <button class="btn-tab btn-tab--dark" type="button" data-to-404" onclick="window.location.href='./404.html'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Top up
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-grid">
+          <button class="qa" type="button" data-to-404>
+            <span class="qa-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+            <span class="qa-name">Send money</span>
+            <span class="qa-desc">To any bank or wallet</span>
+          </button>
+          <button class="qa" type="button" data-to-404>
+            <span class="qa-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+            <span class="qa-name">Top up</span>
+            <span class="qa-desc">Add funds to balance</span>
+          </button>
+          <button class="qa" type="button" data-to-404>
+            <span class="qa-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></span>
+            <span class="qa-name">Withdraw</span>
+            <span class="qa-desc">To your linked bank</span>
+          </button>
+          <button class="qa" type="button" data-to-404>
+            <span class="qa-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="0"/><path d="M2 10h20"/></svg></span>
+            <span class="qa-name">Cards</span>
+            <span class="qa-desc">Manage virtual cards</span>
+          </button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-top"><span class="stat-label">Money in</span><span class="stat-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg></span></div>
+            <p class="stat-value">$<span data-count="8420">0</span></p>
+            <div class="stat-foot"><span class="stat-delta is-up">▲ 12%</span><span class="stat-period">this month</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-top"><span class="stat-label">Money out</span><span class="stat-ico" style="border-top-color:rgba(255,87,34,.4);color:#ff7a45"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></span></div>
+            <p class="stat-value">$<span data-count="3180">0</span></p>
+            <div class="stat-foot"><span class="stat-delta is-down">▼ 4%</span><span class="stat-period">this month</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-top"><span class="stat-label">Transactions</span><span class="stat-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></span></div>
+            <p class="stat-value"><span data-count="142">0</span></p>
+            <div class="stat-foot"><span class="stat-delta is-up">▲ 8</span><span class="stat-period">vs last month</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-top"><span class="stat-label">Cashback</span><span class="stat-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span></div>
+            <p class="stat-value">$<span data-count="124.80" data-decimals="2">0</span></p>
+            <div class="stat-foot"><span class="stat-delta is-up">▲ 18%</span><span class="stat-period">this year</span></div>
+          </div>
+        </div>
+
+        <div class="dash-grid" style="margin-bottom:1rem">
+          <div class="panel chamfer">
+            <div class="card-head">
+              <div><h2 class="card-title">Spending overview</h2><p class="card-sub">Last 30 days · all categories</p></div>
+              <div class="card-tabs" style="padding:0; border:0; margin:0">
+                <button class="card-tab" data-chart="7" type="button">7D</button>
+                <button class="card-tab is-active" data-chart="30" type="button">30D</button>
+                <button class="card-tab" data-chart="90" type="button">90D</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap">
+                <svg viewBox="0 0 700 260" preserveAspectRatio="none" id="revenueChart" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#63fd02" stop-opacity=".32"/>
+                      <stop offset="100%" stop-color="#63fd02" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#8bff3d"/>
+                      <stop offset="100%" stop-color="#63fd02"/>
+                    </linearGradient>
+                  </defs>
+                  <g stroke="rgba(251,252,252,.06)" stroke-width="1">
+                    <line x1="0" y1="40"  x2="700" y2="40"/>
+                    <line x1="0" y1="90"  x2="700" y2="90"/>
+                    <line x1="0" y1="140" x2="700" y2="140"/>
+                    <line x1="0" y1="190" x2="700" y2="190"/>
+                    <line x1="0" y1="240" x2="700" y2="240"/>
+                  </g>
+                  <path id="chartArea" d="M0,190 C60,180 100,150 160,150 C220,150 260,170 320,160 C380,150 420,90 480,80 C540,70 580,110 640,90 L700,70 L700,240 L0,240 Z" fill="url(#chartFill)"/>
+                  <path id="chartLinePath" d="M0,190 C60,180 100,150 160,150 C220,150 260,170 320,160 C380,150 420,90 480,80 C540,70 580,110 640,90 L700,70" fill="none" stroke="url(#chartLine)" stroke-width="2.4" stroke-linecap="round"/>
+                  <circle cx="480" cy="80" r="5" fill="#63fd02"/>
+                  <circle cx="480" cy="80" r="10" fill="none" stroke="rgba(99,253,2,.35)" stroke-width="1.5"/>
+                  <g fill="rgba(251,252,252,.3)" font-size="10" font-family="Inter">
+                    <text x="10" y="258">Apr 1</text>
+                    <text x="140" y="258">Apr 8</text>
+                    <text x="270" y="258">Apr 15</text>
+                    <text x="400" y="258">Apr 22</text>
+                    <text x="530" y="258">Apr 29</text>
+                    <text x="655" y="258">May 6</text>
+                  </g>
+                </svg>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot is-lime"></span> Income <span class="legend-value">$8,420</span></span>
+                <span class="legend-item"><span class="legend-dot is-fire"></span> Spending <span class="legend-value">$3,180</span></span>
+                <span class="legend-item"><span class="legend-dot is-dim"></span> Cashback <span class="legend-value">$124</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel chamfer">
+            <div class="card-head"><div><h2 class="card-title">Recent activity</h2><p class="card-sub">Your latest transactions</p></div></div>
+            <div class="card-body">
+              <div class="feed">
+                <div class="feed-item"><span class="feed-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg></span><div><p class="feed-text">Payment received from <strong>Acme Corp</strong> — <span class="val-lime">+$2,480.00</span></p><p class="feed-time">2 minutes ago</p></div></div>
+                <div class="feed-item"><span class="feed-ico is-fire"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></span><div><p class="feed-text">Transfer to <strong>Sara Lin</strong> — <span class="val-fire">-$340.00</span></p><p class="feed-time">27 minutes ago</p></div></div>
+                <div class="feed-item"><span class="feed-ico is-fire"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="0"/><path d="M2 10h20"/></svg></span><div><p class="feed-text">Card payment at <strong>Amazon</strong> — <span class="val-fire">-$89.99</span></p><p class="feed-time">2 hours ago</p></div></div>
+                <div class="feed-item"><span class="feed-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7 7 7-7"/></svg></span><div><p class="feed-text">Cashback credited — <span class="val-lime">+$24.80</span></p><p class="feed-time">5 hours ago</p></div></div>
+                <div class="feed-item"><span class="feed-ico is-neutral"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><p class="feed-text">New recipient <strong>Sara Lin</strong> saved</p><p class="feed-time">Yesterday</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-grid" style="margin-bottom:1rem">
+          <div class="panel chamfer">
+            <div class="card-head">
+              <div><h2 class="card-title">Your cards</h2><p class="card-sub">2 active cards</p></div>
+              <button class="btn-tab btn-tab--ghost" type="button" data-to-404 style="padding:.5rem .85rem;font-size:.68rem">Manage</button>
+            </div>
+            <div class="card-body">
+              <div class="cards-grid">
+                <div class="credit-card">
+                  <div class="cc-top"><span class="cc-brand">Stackly</span><span class="cc-type">Primary</span></div>
+                  <div><div class="cc-chip"></div><p class="cc-number"><span class="dots">•••• •••• ••••</span> 4821</p></div>
+                  <div class="cc-bottom">
+                    <div><p class="cc-label">Card holder</p><p class="cc-value" id="ccName">User Name</p></div>
+                    <div><p class="cc-label">Expires</p><p class="cc-value">08/28</p></div>
+                    <span class="cc-logo">VISA</span>
+                  </div>
+                </div>
+                <div class="credit-card is-virtual">
+                  <div class="cc-top"><span class="cc-brand">Stackly</span><span class="cc-type">Virtual</span></div>
+                  <div><div class="cc-chip"></div><p class="cc-number"><span class="dots">•••• •••• ••••</span> 7712</p></div>
+                  <div class="cc-bottom">
+                    <div><p class="cc-label">Card holder</p><p class="cc-value" id="ccName2">User Name</p></div>
+                    <div><p class="cc-label">Expires</p><p class="cc-value">12/27</p></div>
+                    <span class="cc-logo">MC</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel chamfer">
+            <div class="card-head">
+              <div><h2 class="card-title">Quick recipients</h2><p class="card-sub">Frequently paid contacts</p></div>
+              <button class="btn-tab btn-tab--ghost" type="button" data-to-404 style="padding:.5rem .85rem;font-size:.68rem">View all</button>
+            </div>
+            <div class="card-body">
+              <div class="recip-grid">
+                <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar">SL</span><div class="recip-info"><p class="recip-name">Sara Lin</p><p class="recip-meta">sara@bluewave.io</p></div></div>
+                <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar">DK</span><div class="recip-info"><p class="recip-name">Daniel Kwon</p><p class="recip-meta">daniel@helios.finance</p></div></div>
+                <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar is-dark">MR</span><div class="recip-info"><p class="recip-name">Maya Reyes</p><p class="recip-meta">maya@northwind.io</p></div></div>
+                <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar is-dark">AO</span><div class="recip-info"><p class="recip-name">Amara Okafor</p><p class="recip-meta">amara@quantia.co</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <a href="./404.html" class="img-link reveal-img" aria-label="Upgrade your account">
+          <img src="images/cta-banner.jpg" alt="Upgrade your Stackly account" loading="lazy" />
+        </a> -->
+      </section>
+
+      <!-- ═══════ VIEW — WALLET ═══════ -->
+      <section class="view" data-view="wallet">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Wallet</span>
+            <h1 class="page-title mt-4">Your wallet</h1>
+            <p class="page-sub">Balance, currencies and linked accounts.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-tab btn-tab--ghost" type="button" data-to-404"  onclick="window.location.href='./404.html'">Statement</button>
+            <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">Add money</button>
+          </div>
+        </div>
+
+        <div class="balance-hero">
+          <div class="balance-row">
+            <div>
+              <p class="balance-label">Available balance</p>
+              <p class="balance-amount">$<span data-count="12480.50" data-decimals="2">0</span></p>
+              <div class="balance-meta">
+                <span>Pending: $240.00</span>
+                <span>·</span>
+                <span>Reserved: $0.00</span>
+              </div>
+            </div>
+            <div class="balance-actions">
+              <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">Top up</button>
+              <button class="btn-tab btn-tab--dark" type="button" data-to-404"  onclick="window.location.href='./404.html'">Withdraw</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="panel chamfer">
+            <div class="card-head"><div><h2 class="card-title">Balance by currency</h2><p class="card-sub">Multi-currency wallet</p></div></div>
+            <div class="card-body">
+              <div class="bar-list">
+                <div class="bar-row"><span class="bar-label">USD</span><div class="bar-track"><span class="bar-fill" style="width:88%"></span></div><span class="bar-value">$12,480</span></div>
+                <div class="bar-row"><span class="bar-label">EUR</span><div class="bar-track"><span class="bar-fill" style="width:32%"></span></div><span class="bar-value">€2,140</span></div>
+                <div class="bar-row"><span class="bar-label">GBP</span><div class="bar-track"><span class="bar-fill" style="width:18%"></span></div><span class="bar-value">£890</span></div>
+                <div class="bar-row"><span class="bar-label">SGD</span><div class="bar-track"><span class="bar-fill" style="width:8%"></span></div><span class="bar-value">S$420</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel chamfer">
+            <div class="card-head"><div><h2 class="card-title">Linked accounts</h2><p class="card-sub">External bank accounts</p></div></div>
+            <div class="card-body">
+              <div class="feed">
+                <div class="feed-item"><span class="feed-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg></span><div><p class="feed-text"><strong>Chase Checking</strong> · •••• 4821</p><p class="feed-time">Verified · Primary</p></div></div>
+                <div class="feed-item"><span class="feed-ico is-neutral"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg></span><div><p class="feed-text"><strong>Wells Fargo Savings</strong> · •••• 1177</p><p class="feed-time">Verified · Backup</p></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VIEW — STATEMENTS (FIXED) ═══════ -->
+      <section class="view" data-view="statements">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Statements</span>
+            <h1 class="page-title mt-4">Monthly statements</h1>
+            <p class="page-sub">Download or view your past statements.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">Download all</button>
+          </div>
+        </div>
+
+        <div class="panel chamfer">
+          <div class="card-head"><div><h2 class="card-title">Statement history</h2><p class="card-sub">Last 8 months</p></div><span class="sk-tag">8 available</span></div>
+          <div class="card-body">
+            <div class="reports-list">
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — April 2025</p>
+                  <p class="report-meta">PDF · 340 KB · Closing balance $12,480.50</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — March 2025</p>
+                  <p class="report-meta">PDF · 328 KB · Closing balance $11,240.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — February 2025</p>
+                  <p class="report-meta">PDF · 318 KB · Closing balance $10,860.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — January 2025</p>
+                  <p class="report-meta">PDF · 312 KB · Closing balance $9,940.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — December 2024</p>
+                  <p class="report-meta">PDF · 305 KB · Closing balance $8,720.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — November 2024</p>
+                  <p class="report-meta">PDF · 298 KB · Closing balance $7,860.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — October 2024</p>
+                  <p class="report-meta">PDF · 288 KB · Closing balance $7,120.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+              <div class="report-row">
+                <span class="report-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+                <div class="report-info">
+                  <p class="report-name">Statement — September 2024</p>
+                  <p class="report-meta">PDF · 276 KB · Closing balance $6,480.00</p>
+                </div>
+                <div class="report-actions">
+                  <button title="View" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button title="Download" type="button" data-to-404><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VIEW — SEND MONEY ═══════ -->
+     <section class="view" data-view="send">
+  <div class="page-head">
+    <div>
+      <span class="sk-tag">Send money</span>
+      <h1 class="page-title mt-4">Send money</h1>
+      <p class="page-sub">Transfer to any bank, wallet or Stackly account.</p>
+    </div>
+  </div>
+
+  <div class="panel chamfer" style="max-width: 44rem">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">New transfer</h2>
+        <p class="card-sub">Funds arrive in seconds</p>
+      </div>
+    </div>
+
+    <form id="sendForm" class="card-body" action="./404.html" method="get" novalidate>
+      <div class="settings-grid">
+        <!-- Recipient -->
+        <div class="form-field" id="sendFieldRecipient">
+          <label class="form-label-s" for="sendRecipient"
+            >Recipient <span class="req">*</span></label
+          >
+          <input
+            class="form-input"
+            type="text"
+            id="sendRecipient"
+            name="recipient"
+            placeholder="Name or email"
+            autocomplete="off"
+            aria-required="true"
+            aria-describedby="sendErrRecipient"
+          />
+          <span
+            class="field-error"
+            id="sendErrRecipient"
+            aria-live="polite"
+          ></span>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-field" id="sendFieldAmount">
+          <label class="form-label-s" for="sendAmount"
+            >Amount (USD) <span class="req">*</span></label
+          >
+          <input
+            class="form-input"
+            type="text"
+            id="sendAmount"
+            name="amount"
+            placeholder="0.00"
+            inputmode="decimal"
+            autocomplete="off"
+            aria-required="true"
+            aria-describedby="sendErrAmount"
+          />
+          <span
+            class="field-error"
+            id="sendErrAmount"
+            aria-live="polite"
+          ></span>
+        </div>
+
+        <!-- From account -->
+        <div class="form-field" id="sendFieldFrom">
+          <label class="form-label-s" for="sendFrom"
+            >From account <span class="req">*</span></label
+          >
+          <select
+            class="form-input"
+            id="sendFrom"
+            name="fromAccount"
+            aria-required="true"
+            aria-describedby="sendErrFrom"
+          >
+            <option value="">Select an account</option>
+            <option value="stackly-balance">
+              Stackly Balance — $12,480.50
+            </option>
+            <option value="chase-checking">
+              Chase Checking — •••• 4821
+            </option>
+          </select>
+          <span class="field-error" id="sendErrFrom" aria-live="polite"></span>
+        </div>
+
+        <!-- Note -->
+        <div class="form-field" id="sendFieldNote">
+          <label class="form-label-s" for="sendNote"
+            >Note <span class="req">*</span></label
+          >
+          <input
+            class="form-input"
+            type="text"
+            id="sendNote"
+            name="note"
+            placeholder="What's it for?"
+            autocomplete="off"
+            aria-required="true"
+            aria-describedby="sendErrNote"
+          />
+          <span class="field-error" id="sendErrNote" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.4rem">
+        <button class="btn-tab btn-tab--lime btn-tab--full" type="submit">
+          Send money
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+      <!-- ═══════ VIEW — TRANSACTIONS ═══════ -->
+      <section class="view" data-view="transactions">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Transactions</span>
+            <h1 class="page-title mt-4">All transactions</h1>
+            <p class="page-sub">142 transactions in the last 30 days.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-tab btn-tab--ghost" type="button" data-to-404"  onclick="window.location.href='./404.html'">Filters</button>
+            <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="panel chamfer">
+          <div class="card-head"><div><h2 class="card-title">Transaction history</h2><p class="card-sub">Most recent first</p></div></div>
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Description</th><th>Type</th><th>Status</th><th>Amount</th><th>Date</th></tr></thead>
+              <tbody>
+                <tr><td>Acme Corp — invoice #4821</td><td>Received</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-lime">+$2,480.00</span></td><td>Today</td></tr>
+                <tr><td>Sara Lin — personal transfer</td><td>Sent</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-fire">-$340.00</span></td><td>Today</td></tr>
+                <tr><td>Amazon — card payment</td><td>Card</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-fire">-$89.99</span></td><td>Today</td></tr>
+                <tr><td>Cashback from card 4821</td><td>Reward</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-lime">+$24.80</span></td><td>Today</td></tr>
+                <tr><td>Nova Labs — invoice #4885</td><td>Received</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-lime">+$1,120.00</span></td><td>Yesterday</td></tr>
+                <tr><td>Netflix subscription</td><td>Card</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-fire">-$15.99</span></td><td>Yesterday</td></tr>
+                <tr><td>Withdraw to Chase</td><td>Withdrawal</td><td><span class="tbl-status is-pending">Pending</span></td><td><span class="tbl-amount">-$500.00</span></td><td>2 days ago</td></tr>
+                <tr><td>Starbucks — card payment</td><td>Card</td><td><span class="tbl-status is-active">Completed</span></td><td><span class="tbl-amount is-fire">-$7.85</span></td><td>3 days ago</td></tr>
+                <tr><td>Orbit Pay — refund</td><td>Refund</td><td><span class="tbl-status is-failed">Failed</span></td><td><span class="tbl-amount">$0.00</span></td><td>3 days ago</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VIEW — CARDS ═══════ -->
+      <section class="view" data-view="cards">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">My cards</span>
+            <h1 class="page-title mt-4">Your cards</h1>
+            <p class="page-sub">2 active cards · 1 virtual card available.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              New card
+            </button>
+          </div>
+        </div>
+
+        <div class="cards-grid" style="margin-bottom:1rem">
+          <div class="credit-card">
+            <div class="cc-top"><span class="cc-brand">Stackly</span><span class="cc-type">Primary</span></div>
+            <div><div class="cc-chip"></div><p class="cc-number"><span class="dots">•••• •••• ••••</span> 4821</p></div>
+            <div class="cc-bottom">
+              <div><p class="cc-label">Card holder</p><p class="cc-value" id="ccName3">User Name</p></div>
+              <div><p class="cc-label">Expires</p><p class="cc-value">08/28</p></div>
+              <span class="cc-logo">VISA</span>
+            </div>
+          </div>
+
+          <div class="credit-card is-virtual">
+            <div class="cc-top"><span class="cc-brand">Stackly</span><span class="cc-type">Virtual</span></div>
+            <div><div class="cc-chip"></div><p class="cc-number"><span class="dots">•••• •••• ••••</span> 7712</p></div>
+            <div class="cc-bottom">
+              <div><p class="cc-label">Card holder</p><p class="cc-value" id="ccName4">User Name</p></div>
+              <div><p class="cc-label">Expires</p><p class="cc-value">12/27</p></div>
+              <span class="cc-logo">MC</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel chamfer">
+          <div class="card-head"><div><h2 class="card-title">Card controls</h2><p class="card-sub">Manage your active cards</p></div></div>
+          <div class="card-body">
+            <div class="switch-row">
+              <div class="switch-info"><p class="switch-title">Online payments</p><p class="switch-desc">Allow your cards to be used online</p></div>
+              <div class="switch is-on" data-switch></div>
+            </div>
+            <div class="switch-row">
+              <div class="switch-info"><p class="switch-title">International transactions</p><p class="switch-desc">Allow purchases outside your home country</p></div>
+              <div class="switch is-on" data-switch></div>
+            </div>
+            <div class="switch-row">
+              <div class="switch-info"><p class="switch-title">Contactless payments</p><p class="switch-desc">Enable tap-to-pay on physical cards</p></div>
+              <div class="switch is-on" data-switch></div>
+            </div>
+            <div class="switch-row">
+              <div class="switch-info"><p class="switch-title">Freeze card</p><p class="switch-desc">Temporarily disable all transactions</p></div>
+              <div class="switch" data-switch></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VIEW — RECIPIENTS ═══════ -->
+      <section class="view" data-view="recipients">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Recipients</span>
+            <h1 class="page-title mt-4">Saved recipients</h1>
+            <p class="page-sub">Frequently paid contacts and accounts.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn-tab btn-tab--lime" type="button" data-to-404"  onclick="window.location.href='./404.html'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Add recipient
+            </button>
+          </div>
+        </div>
+
+        <div class="recip-grid">
+          <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar">SL</span><div class="recip-info"><p class="recip-name">Sara Lin</p><p class="recip-meta">sara@bluewave.io</p></div></div>
+          <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar">DK</span><div class="recip-info"><p class="recip-name">Daniel Kwon</p><p class="recip-meta">daniel@helios.finance</p></div></div>
+          <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar is-dark">MR</span><div class="recip-info"><p class="recip-name">Maya Reyes</p><p class="recip-meta">maya@northwind.io</p></div></div>
+          <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar is-dark">AO</span><div class="recip-info"><p class="recip-name">Amara Okafor</p><p class="recip-meta">amara@quantia.co</p></div></div>
+          <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar is-dark">TN</span><div class="recip-info"><p class="recip-name">Tomás Nunes</p><p class="recip-meta">tomas@orbital.dev</p></div></div>
+          <div class="recip" data-to-404 role="button" tabindex="0"><span class="recip-avatar is-dark">JV</span><div class="recip-info"><p class="recip-name">Jonas Vidal</p><p class="recip-meta">jonas@meridian.com</p></div></div>
+        </div>
+      </section>
+
+      <!-- ═══════ VIEW — PROFILE ═══════ -->
+      <section class="view" data-view="profile">
+  <div class="page-head">
+    <div>
+      <span class="sk-tag">Profile</span>
+      <h1 class="page-title mt-4">Your profile</h1>
+      <p class="page-sub">Name, contact details and identity information.</p>
+    </div>
+    <div class="page-actions">
+      <button
+        class="btn-tab btn-tab--ghost"
+        type="button"
+        onclick="window.location.href='./404.html'"
+      >
+        Edit photo
+      </button>
+    </div>
+  </div>
+
+  <div class="panel chamfer" style="max-width: 44rem">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Personal information</h2>
+        <p class="card-sub">How we address you</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <form id="profileForm" action="./404.html" method="get" novalidate>
+        <div class="settings-grid">
+          <!-- Full name -->
+          <div class="form-field" id="pfFieldName">
+            <label class="form-label-s" for="profileName"
+              >Full name <span class="req">*</span></label
+            >
+            <input
+              class="form-input"
+              type="text"
+              id="profileName"
+              name="fullName"
+              value=""
+              placeholder="Jane Doe"
+              autocomplete="name"
+              aria-required="true"
+              aria-describedby="pfErrName"
+            />
+            <span class="field-error" id="pfErrName" aria-live="polite"></span>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field" id="pfFieldEmail">
+            <label class="form-label-s" for="profileEmail"
+              >Email <span class="req">*</span></label
+            >
+            <input
+              class="form-input"
+              type="email"
+              id="profileEmail"
+              name="email"
+              value=""
+              placeholder="you@company.com"
+              autocomplete="email"
+              aria-required="true"
+              aria-describedby="pfErrEmail"
+            />
+            <span class="field-error" id="pfErrEmail" aria-live="polite"></span>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-field" id="pfFieldPhone">
+            <label class="form-label-s" for="profilePhone"
+              >Phone <span class="req">*</span></label
+            >
+            <input
+              class="form-input"
+              type="tel"
+              id="profilePhone"
+              name="phone"
+              placeholder="+1 (212) 555-0142"
+              autocomplete="tel"
+              aria-required="true"
+              aria-describedby="pfErrPhone"
+            />
+            <span class="field-error" id="pfErrPhone" aria-live="polite"></span>
+          </div>
+
+          <!-- Date of birth -->
+          <div class="form-field" id="pfFieldDob">
+            <label class="form-label-s" for="profileDob"
+              >Date of birth <span class="req">*</span></label
+            >
+            <input
+              class="form-input"
+              type="text"
+              id="profileDob"
+              name="dob"
+              placeholder="DD / MM / YYYY"
+              inputmode="numeric"
+              autocomplete="bday"
+              aria-required="true"
+              aria-describedby="pfErrDob"
+            />
+            <span class="field-error" id="pfErrDob" aria-live="polite"></span>
+          </div>
+
+          <!-- Country -->
+          <div class="form-field" id="pfFieldCountry">
+            <label class="form-label-s" for="profileCountry"
+              >Country <span class="req">*</span></label
+            >
+            <select
+              class="form-input"
+              id="profileCountry"
+              name="country"
+              aria-required="true"
+              aria-describedby="pfErrCountry"
+            >
+              <option value="">Select country</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Singapore">Singapore</option>
+              <option value="United Arab Emirates">United Arab Emirates</option>
+            </select>
+            <span
+              class="field-error"
+              id="pfErrCountry"
+              aria-live="polite"
+            ></span>
+          </div>
+
+          <!-- Preferred language -->
+          <div class="form-field" id="pfFieldLanguage">
+            <label class="form-label-s" for="profileLanguage"
+              >Preferred language <span class="req">*</span></label
+            >
+            <select
+              class="form-input"
+              id="profileLanguage"
+              name="language"
+              aria-required="true"
+              aria-describedby="pfErrLanguage"
+            >
+              <option value="">Select language</option>
+              <option value="English">English</option>
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+            </select>
+            <span
+              class="field-error"
+              id="pfErrLanguage"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.4rem">
+          <button class="btn-tab btn-tab--lime" type="submit">
+            Save changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+      <!-- ═══════ VIEW — SECURITY ═══════ -->
+      <section class="view" data-view="security">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Security</span>
+            <h1 class="page-title mt-4">Security</h1>
+            <p class="page-sub">Password, 2FA and session settings.</p>
+          </div>
+        </div>
+
+        <div class="panel chamfer" style="margin-bottom:1rem">
+          <div class="card-head"><div><h2 class="card-title">Sign-in &amp; authentication</h2><p class="card-sub">Protect your account</p></div></div>
+          <div class="card-body">
+            <div class="sec-list">
+              <div class="sec-row">
+                <span class="sec-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="0"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+                <div class="sec-info"><p class="sec-title">Password</p><p class="sec-desc">Last changed 42 days ago</p></div>
+                <button class="btn-tab btn-tab--ghost" type="button" data-to-404>Change</button>
+              </div>
+              <div class="sec-row">
+                <span class="sec-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+                <div class="sec-info"><p class="sec-title">Two-factor authentication</p><p class="sec-desc">Currently enabled with authenticator app</p></div>
+                <button class="btn-tab btn-tab--ghost" type="button" data-to-404>Manage</button>
+              </div>
+              <div class="sec-row">
+                <span class="sec-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="0"/><path d="M2 7l10 6 10-6"/></svg></span>
+                <div class="sec-info"><p class="sec-title">Recovery email</p><p class="sec-desc">backup@stackly.com</p></div>
+                <button class="btn-tab btn-tab--ghost" type="button" data-to-404>Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel chamfer">
+          <div class="card-head"><div><h2 class="card-title">Active sessions</h2><p class="card-sub">Devices currently signed in</p></div></div>
+          <div class="card-body">
+            <div class="sec-list">
+              <div class="sec-row">
+                <span class="sec-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="0"/><path d="M8 21h8M12 17v4"/></svg></span>
+                <div class="sec-info"><p class="sec-title">Chrome on macOS · Current session</p><p class="sec-desc">New York, US · Last active just now</p></div>
+                <button class="btn-tab btn-tab--danger" type="button" data-to-404>Sign out</button>
+              </div>
+              <div class="sec-row">
+                <span class="sec-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="0"/><path d="M12 18h.01"/></svg></span>
+                <div class="sec-info"><p class="sec-title">Stackly iOS · iPhone 15</p><p class="sec-desc">New York, US · Last active 2 hours ago</p></div>
+                <button class="btn-tab btn-tab--danger" type="button" data-to-404>Sign out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════ VIEW — SETTINGS ═══════ -->
+      <section class="view" data-view="settings">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Settings</span>
+            <h1 class="page-title mt-4">Account settings</h1>
+            <p class="page-sub">Update your preferences and contact details.</p>
+          </div>
+        </div>
+
+        <form id="settingsForm" novalidate>
+          <div class="panel chamfer" style="margin-bottom:1rem">
+            <div class="card-head"><div><h2 class="card-title">Personal details</h2><p class="card-sub">All fields are required</p></div></div>
+            <div class="card-body">
+              <div class="settings-grid">
+                <div class="form-field" data-field>
+                  <label class="form-label-s" for="sFullName">Full name <span class="req">*</span></label>
+                  <input class="form-input" type="text" id="sFullName" name="fullName" placeholder="Jane Doe" data-required data-required-msg="Please enter your full name" data-min="2" />
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+                <div class="form-field" data-field>
+                  <label class="form-label-s" for="sEmail">Email address <span class="req">*</span></label>
+                  <input class="form-input" type="email" id="sEmail" name="email" placeholder="you@company.com" data-required data-required-msg="Please enter your email address" />
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+                <div class="form-field" data-field>
+                  <label class="form-label-s" for="sPhone">Phone number <span class="req">*</span></label>
+                  <input class="form-input" type="tel" id="sPhone" name="phone" placeholder="+1 212 555 0142" data-required data-required-msg="Please enter your phone number" data-min="7" />
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+                <div class="form-field" data-field>
+                  <label class="form-label-s" for="sCountry">Country <span class="req">*</span></label>
+                  <select class="form-input" id="sCountry" name="country" data-required data-required-msg="Please select a country">
+                    <option value="">Select a country…</option>
+                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="SG">Singapore</option>
+                    <option value="AE">United Arab Emirates</option>
+                    <option value="IN">India</option>
+                    <option value="DE">Germany</option>
+                    <option value="AU">Australia</option>
+                  </select>
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+                <div class="form-field" data-field>
+                  <label class="form-label-s" for="sCurrency">Default currency <span class="req">*</span></label>
+                  <select class="form-input" id="sCurrency" name="currency" data-required data-required-msg="Please select a currency">
+                    <option value="">Select a currency…</option>
+                    <option value="USD">USD — US Dollar</option>
+                    <option value="EUR">EUR — Euro</option>
+                    <option value="GBP">GBP — British Pound</option>
+                    <option value="SGD">SGD — Singapore Dollar</option>
+                  </select>
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+                <div class="form-field" data-field>
+                  <label class="form-label-s" for="sTimezone">Timezone <span class="req">*</span></label>
+                  <select class="form-input" id="sTimezone" name="timezone" data-required data-required-msg="Please select a timezone">
+                    <option value="">Select a timezone…</option>
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">America/New_York</option>
+                    <option value="Europe/London">Europe/London</option>
+                    <option value="Asia/Singapore">Asia/Singapore</option>
+                  </select>
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+                <div class="form-field" data-field style="grid-column:1/-1">
+                  <label class="form-label-s" for="sAddress">Billing address <span class="req">*</span></label>
+                  <input class="form-input" type="text" id="sAddress" name="address" placeholder="123 Main Street, Apt 4B, New York, NY 10010" data-required data-required-msg="Please enter your billing address" data-min="8" />
+                  <span class="field-error" aria-live="polite"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel chamfer" style="margin-bottom:1rem">
+            <div class="card-head"><div><h2 class="card-title">Notifications</h2><p class="card-sub">Choose what to be alerted about</p></div></div>
+            <div class="card-body">
+              <div class="switch-row">
+                <div class="switch-info"><p class="switch-title">Transaction alerts</p><p class="switch-desc">Get notified for every payment you send or receive</p></div>
+                <div class="switch is-on" data-switch></div>
+              </div>
+              <div class="switch-row">
+                <div class="switch-info"><p class="switch-title">Security alerts</p><p class="switch-desc">Sign-in from a new device or location</p></div>
+                <div class="switch is-on" data-switch></div>
+              </div>
+              <div class="switch-row">
+                <div class="switch-info"><p class="switch-title">Low balance warning</p><p class="switch-desc">Alert when balance drops below $100</p></div>
+                <div class="switch is-on" data-switch></div>
+              </div>
+              <div class="switch-row">
+                <div class="switch-info"><p class="switch-title">Product updates</p><p class="switch-desc">New features, offers and announcements</p></div>
+                <div class="switch" data-switch></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap">
+            <button type="submit" class="btn-tab btn-tab--lime">
+              Save settings
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button type="button" class="btn-tab btn-tab--ghost" id="resetSettingsBtn"  onclick="window.location.href='./404.html'">Reset</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ═══════ VIEW — HELP ═══════ -->
+      <section class="view" data-view="help">
+        <div class="page-head">
+          <div>
+            <span class="sk-tag">Help center</span>
+            <h1 class="page-title mt-4">How can we help?</h1>
+            <p class="page-sub">Guides, FAQs and ways to reach our team.</p>
+          </div>
+        </div>
+
+        <div class="help-grid" style="margin-bottom:1rem">
+          <a href="./404.html" class="help-card">
+            <span class="help-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg></span>
+            <div class="help-info"><p class="help-title">Getting started guide</p><p class="help-desc">Set up your wallet, cards and recipients in 5 minutes.</p></div>
+          </a>
+          <a href="./404.html" class="help-card">
+            <span class="help-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+            <div class="help-info"><p class="help-title">Security best practices</p><p class="help-desc">Keep your account safe with 2FA and strong passwords.</p></div>
+          </a>
+          <a href="./404.html" class="help-card">
+            <span class="help-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></svg></span>
+            <div class="help-info"><p class="help-title">Sending money</p><p class="help-desc">How to send to any bank, wallet or Stackly account.</p></div>
+          </a>
+          <a href="./404.html" class="help-card">
+            <span class="help-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="0"/><path d="M2 10h20"/></svg></span>
+            <div class="help-info"><p class="help-title">Managing your cards</p><p class="help-desc">Freeze, unfreeze and set spending limits.</p></div>
+          </a>
+          <a href="./404.html" class="help-card">
+            <span class="help-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+            <div class="help-info"><p class="help-title">Contact support</p><p class="help-desc">Reach our team 24/7 for account issues.</p></div>
+          </a>
+          <a href="./404.html" class="help-card">
+            <span class="help-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+            <div class="help-info"><p class="help-title">Terms &amp; policies</p><p class="help-desc">Read our privacy, terms and cookie policies.</p></div>
+          </a>
+        </div>
+
+        <div class="panel chamfer">
+          <div class="card-head"><div><h2 class="card-title">Still need help?</h2><p class="card-sub">Our support team responds within 4 hours</p></div></div>
+          <div class="card-body">
+            <p style="font-size:.88rem;color:rgba(251,252,252,.55);line-height:1.7;max-width:44rem">
+              Can't find what you're looking for? Reach out to us any time — email us at
+              <span style="color:var(--lime);font-weight:600">support@stackly.com</span>
+              or open a ticket and we'll get right back to you.
+            </p>
+            <div style="margin-top:1.2rem">
+              <a href="./404.html" class="btn-tab btn-tab--lime">
+                Open a support ticket
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  var role = null, email = null, name = null;
+  try {
+    role  = localStorage.getItem('stackly_user_role');
+    email = localStorage.getItem('stackly_user_email');
+    name  = localStorage.getItem('stackly_user_name');
+  } catch (e) {}
+
+  if (!role || role !== 'user') {
+    window.location.replace('./login.html');
+    return;
+  }
+
+  var displayEmail = email || 'user@stackly.com';
+  var displayName  = name  || (email ? email.split('@')[0] : 'User');
+
+  ['sbEmail','tbEmail'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.textContent = displayEmail;
+  });
+  var userEl = document.getElementById('userName');
+  if (userEl) userEl.textContent = displayName;
+
+  var initials = displayName.trim().split(/\s+/).map(function(p){ return p[0] || ''; }).join('').slice(0,2).toUpperCase() || 'U';
+  ['sbAvatar','tbAvatar'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.textContent = initials;
+  });
+
+  ['ccName','ccName2','ccName3','ccName4'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.textContent = displayName;
+  });
+  var pName  = document.getElementById('profileName');
+  var pEmail = document.getElementById('profileEmail');
+  if (pName)  pName.value  = displayName;
+  if (pEmail) pEmail.value = displayEmail;
+
+  var sName  = document.getElementById('sFullName');
+  var sEmail = document.getElementById('sEmail');
+  if (sName)  sName.value  = displayName;
+  if (sEmail) sEmail.value = displayEmail;
+
+  var logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      try {
+        ['stackly_user_role','stackly_user_email','stackly_user_name','stackly_user_signed_in','stackly_user_signed_in_at'].forEach(function(k){
+          localStorage.removeItem(k);
+        });
+      } catch (err) {}
+      window.location.href = './login.html';
+    });
+  }
+
+  document.body.addEventListener('click', function (e) {
+    var target = e.target.closest('[data-to-404]');
+    if (target && !target.disabled) {
+      e.preventDefault();
+      window.location.href = './404.html';
+    }
+  });
+  document.body.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var target = e.target.closest('[data-to-404][role="button"]');
+    if (target) {
+      e.preventDefault();
+      window.location.href = './404.html';
+    }
+  });
+
+  var sidebar  = document.getElementById('sidebar');
+  var backdrop = document.getElementById('sidebarBackdrop');
+  var burger   = document.getElementById('tbBurger');
+  var closeBtn = document.getElementById('sbClose');
+
+  function openSidebar() {
+    sidebar && sidebar.classList.add('is-open');
+    backdrop && backdrop.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar && sidebar.classList.remove('is-open');
+    backdrop && backdrop.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  if (burger)   burger.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 1024) {
+      closeSidebar();
+      document.body.style.overflow = '';
+    }
+  });
+
+  var navLinks = document.querySelectorAll('.sb-link[data-nav]');
+  var views    = document.querySelectorAll('.view[data-view]');
+
+  function switchView(viewName) {
+    navLinks.forEach(function (link) {
+      link.classList.toggle('is-active', link.dataset.nav === viewName);
+    });
+    views.forEach(function (view) {
+      view.classList.toggle('is-active', view.dataset.view === viewName);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.innerWidth < 1024) closeSidebar();
+    setTimeout(function () {
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+      runCountersInView(viewName);
+      animateViewElements();
+    }, 60);
+  }
+
+  navLinks.forEach(function (link) {
+    link.addEventListener('click', function () {
+      switchView(link.dataset.nav);
+    });
+  });
+
+  if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var progressBar = document.querySelector('.scroll-progress');
+  if (progressBar && !reduceMotion) {
+    gsap.to(progressBar, {
+      scaleX: 1, ease: 'none',
+      scrollTrigger: { trigger: document.documentElement, start: 'top top', end: 'bottom bottom', scrub: 0.2 }
+    });
+  }
+
+  if (!reduceMotion) {
+    var tl = gsap.timeline({ delay: 0.15, defaults: { ease: 'power3.out' } });
+    tl.from('.sidebar', { x: -40, opacity: 0, duration: 0.7 })
+      .from('.topbar', { y: -20, opacity: 0, duration: 0.6 }, '-=0.5')
+      .from('.tb-logo', { opacity: 0, y: 8, duration: 0.5 }, '-=0.4')
+      .from('.page-head > div:first-child > *', { y: 22, opacity: 0, duration: 0.6, stagger: 0.08 }, '-=0.35')
+      .from('.page-actions .btn-tab', { y: 16, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.35')
+      .from('.ticker', { opacity: 0, y: 14, duration: 0.5 }, '-=0.4')
+      .from('.balance-hero', { y: 40, opacity: 0, scale: 0.98, duration: 0.75 }, '-=0.35')
+      .from('.qa', { y: 30, opacity: 0, scale: 0.97, duration: 0.6, stagger: 0.07 }, '-=0.4')
+      .from('.stat', { y: 40, opacity: 0, scale: 0.97, duration: 0.7, stagger: 0.08 }, '-=0.35');
+  }
+
+  function animateViewElements() {
+    if (reduceMotion) return;
+    var activeView = document.querySelector('.view.is-active');
+    if (!activeView) return;
+
+    var panels = activeView.querySelectorAll('.panel');
+    gsap.fromTo(panels,
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.7, stagger: 0.08, ease: 'power3.out', overwrite: true, clearProps: 'transform' }
+    );
+
+    activeView.querySelectorAll('.reveal-img').forEach(function (link) {
+      gsap.fromTo(link,
+        { clipPath: 'inset(0 0 100% 0)' },
+        { clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power4.inOut' }
+      );
+      var img = link.querySelector('img');
+      if (img) gsap.fromTo(img, { scale: 1.15 }, { scale: 1, duration: 1.3, ease: 'power4.out' });
+    });
+
+    activeView.querySelectorAll('.bar-fill').forEach(function (bar) {
+      var w = bar.dataset.w || bar.style.width;
+      bar.dataset.w = w;
+      bar.style.width = '0%';
+      setTimeout(function () { bar.style.width = w; }, 120);
+    });
+  }
+
+  animateViewElements();
+
+  var countedEls = new WeakSet();
+
+  function runCountersInView(viewName) {
+    var view = document.querySelector('.view[data-view="' + viewName + '"]');
+    if (!view) return;
+    view.querySelectorAll('[data-count]').forEach(function (el) {
+      if (countedEls.has(el)) return;
+      countedEls.add(el);
+      var end      = parseFloat(el.dataset.count) || 0;
+      var decimals = parseInt(el.dataset.decimals || '0', 10);
+      var obj      = { v: 0 };
+      gsap.to(obj, {
+        v: end, duration: 1.6, ease: 'power2.out',
+        onUpdate: function () {
+          el.textContent = decimals > 0 ? obj.v.toFixed(decimals) : Math.round(obj.v).toLocaleString();
+        }
+      });
+    });
+  }
+
+  runCountersInView('dashboard');
+
+  var chartTabs = document.querySelectorAll('[data-chart]');
+  var chartArea = document.getElementById('chartArea');
+  var chartLine = document.getElementById('chartLinePath');
+  var paths = {
+    '7': {
+      area: 'M0,200 C60,190 100,175 160,180 C220,185 260,155 320,150 C380,145 420,120 480,110 C540,100 580,120 640,105 L700,95 L700,240 L0,240 Z',
+      line: 'M0,200 C60,190 100,175 160,180 C220,185 260,155 320,150 C380,145 420,120 480,110 C540,100 580,120 640,105 L700,95'
+    },
+    '30': {
+      area: 'M0,190 C60,180 100,150 160,150 C220,150 260,170 320,160 C380,150 420,90 480,80 C540,70 580,110 640,90 L700,70 L700,240 L0,240 Z',
+      line: 'M0,190 C60,180 100,150 160,150 C220,150 260,170 320,160 C380,150 420,90 480,80 C540,70 580,110 640,90 L700,70'
+    },
+    '90': {
+      area: 'M0,175 C60,160 100,120 160,130 C220,140 260,100 320,90 C380,80 420,60 480,55 C540,50 580,40 640,30 L700,25 L700,240 L0,240 Z',
+      line: 'M0,175 C60,160 100,120 160,130 C220,140 260,100 320,90 C380,80 420,60 480,55 C540,50 580,40 640,30 L700,25'
+    }
+  };
+  chartTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      chartTabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var p = paths[tab.dataset.chart];
+      if (!p || !chartArea || !chartLine) return;
+      gsap.to([chartArea, chartLine], {
+        duration: 0.2, opacity: 0.4,
+        onComplete: function () {
+          chartArea.setAttribute('d', p.area);
+          chartLine.setAttribute('d', p.line);
+          gsap.to([chartArea, chartLine], { duration: 0.5, opacity: 1 });
+        }
+      });
+    });
+  });
+
+  var refreshBtn = document.getElementById('refreshBtn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', function () {
+      gsap.fromTo(refreshBtn, { rotate: 0 }, { rotate: 360, duration: 0.7, ease: 'power2.inOut' });
+      animateViewElements();
+    });
+  }
+
+  document.querySelectorAll('[data-switch]').forEach(function (sw) {
+    sw.addEventListener('click', function () { sw.classList.toggle('is-on'); });
+  });
+
+  var ticker = document.querySelector('.ticker-track');
+  if (ticker) {
+    document.addEventListener('visibilitychange', function () {
+      ticker.style.animationPlayState = document.hidden ? 'paused' : 'running';
+    });
+  }
+
+  var settingsForm = document.getElementById('settingsForm');
+  if (settingsForm) {
+    var fields = settingsForm.querySelectorAll('[data-required]');
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function wrapOf(el) { return el.closest('.form-field'); }
+
+    function setError(el, msg) {
+      var wrap = wrapOf(el);
+      if (!wrap) return;
+      wrap.classList.add('has-error');
+      var box = wrap.querySelector('.field-error');
+      if (box) box.textContent = msg;
+      if (!wrap.dataset.shaken) {
+        wrap.classList.remove('shake');
+        void wrap.offsetWidth;
+        wrap.classList.add('shake');
+        wrap.dataset.shaken = '1';
+      }
+    }
+
+    function clearError(el) {
+      var wrap = wrapOf(el);
+      if (!wrap) return;
+      wrap.classList.remove('has-error', 'shake');
+      delete wrap.dataset.shaken;
+      var box = wrap.querySelector('.field-error');
+      if (box) box.textContent = '';
+    }
+
+    function validateField(el) {
+      var val = (el.value || '').trim();
+      var requiredMsg = el.dataset.requiredMsg || 'This field is required';
+
+      if (val === '') { setError(el, requiredMsg); return false; }
+      if (el.type === 'email' && !EMAIL_RE.test(val)) {
+        setError(el, 'Please enter a valid email address');
+        return false;
+      }
+      if (el.dataset.min) {
+        var min = parseInt(el.dataset.min, 10);
+        if (val.length < min) {
+          setError(el, 'Please enter at least ' + min + ' characters');
+          return false;
+        }
+      }
+      clearError(el);
+      return true;
+    }
+
+    fields.forEach(function (el) {
+      var evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+      el.addEventListener(evt, function () {
+        if (wrapOf(el) && wrapOf(el).classList.contains('has-error')) validateField(el);
+      });
+      el.addEventListener('blur', function () {
+        if ((el.value || '').trim() !== '') validateField(el);
+      });
+    });
+
+    settingsForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var firstBad = null;
+      fields.forEach(function (el) {
+        if (!validateField(el) && !firstBad) firstBad = el;
+      });
+
+      if (firstBad) {
+        var y = firstBad.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        if (firstBad.focus) setTimeout(function(){ firstBad.focus({ preventScroll: true }); }, 320);
+        return;
+      }
+
+      window.location.href = './404.html';
+    });
+
+    var resetBtn = document.getElementById('resetSettingsBtn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        fields.forEach(function (el) {
+          if (el.tagName === 'SELECT') el.selectedIndex = 0;
+          else el.value = '';
+          clearError(el);
+        });
+      });
+    }
+  }
+
+})();
+(function () {
+  "use strict";
+
+  var form = document.getElementById("profileForm");
+  if (!form) return;
+
+  /* ── Field registry ─────────────────────────────────── */
+  var fields = {
+    name: {
+      input: document.getElementById("profileName"),
+      field: document.getElementById("pfFieldName"),
+      error: document.getElementById("pfErrName"),
+    },
+    email: {
+      input: document.getElementById("profileEmail"),
+      field: document.getElementById("pfFieldEmail"),
+      error: document.getElementById("pfErrEmail"),
+    },
+    phone: {
+      input: document.getElementById("profilePhone"),
+      field: document.getElementById("pfFieldPhone"),
+      error: document.getElementById("pfErrPhone"),
+    },
+    dob: {
+      input: document.getElementById("profileDob"),
+      field: document.getElementById("pfFieldDob"),
+      error: document.getElementById("pfErrDob"),
+    },
+    country: {
+      input: document.getElementById("profileCountry"),
+      field: document.getElementById("pfFieldCountry"),
+      error: document.getElementById("pfErrCountry"),
+    },
+    language: {
+      input: document.getElementById("profileLanguage"),
+      field: document.getElementById("pfFieldLanguage"),
+      error: document.getElementById("pfErrLanguage"),
+    },
+  };
+
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var PHONE_RE = /^[+]?[\d\s().-]{7,}$/;
+  var DOB_RE = /^(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4})$/;
+
+  /* ── Error helpers ──────────────────────────────────── */
+  function setError(key, msg) {
+    var f = fields[key];
+    if (!f || !f.field) return;
+    f.field.classList.add("has-error");
+    if (f.error) f.error.textContent = msg;
+    if (f.input) f.input.setAttribute("aria-invalid", "true");
+
+    if (!f.field.dataset.shaken) {
+      f.field.classList.remove("shake");
+      void f.field.offsetWidth; /* force reflow to restart animation */
+      f.field.classList.add("shake");
+      f.field.dataset.shaken = "1";
+    }
+  }
+
+  function clearError(key) {
+    var f = fields[key];
+    if (!f || !f.field) return;
+    f.field.classList.remove("has-error", "shake");
+    delete f.field.dataset.shaken;
+    if (f.error) f.error.textContent = "";
+    if (f.input) f.input.removeAttribute("aria-invalid");
+  }
+
+  /* ── Validators ─────────────────────────────────────── */
+  function validateName() {
+    var v = fields.name.input.value.trim();
+    if (v === "")
+      return (setError("name", "Please enter your full name"), false);
+    if (v.length < 2)
+      return (setError("name", "Name must be at least 2 characters"), false);
+    if (!/[A-Za-z\u00C0-\u024F]/.test(v))
+      return (setError("name", "Please enter a valid name"), false);
+    clearError("name");
+    return true;
+  }
+
+  function validateEmail() {
+    var v = fields.email.input.value.trim();
+    if (v === "")
+      return (setError("email", "Please enter your email address"), false);
+    if (!EMAIL_RE.test(v))
+      return (setError("email", "Please enter a valid email address"), false);
+    clearError("email");
+    return true;
+  }
+
+  function validatePhone() {
+    var v = fields.phone.input.value.trim();
+    if (v === "")
+      return (setError("phone", "Please enter your phone number"), false);
+    var digits = v.replace(/\D/g, "");
+    if (!PHONE_RE.test(v) || digits.length < 7 || digits.length > 15)
+      return (setError("phone", "Please enter a valid phone number"), false);
+    clearError("phone");
+    return true;
+  }
+
+  function validateDob() {
+    var v = fields.dob.input.value.trim();
+    if (v === "")
+      return (setError("dob", "Please enter your date of birth"), false);
+
+    var m = v.match(DOB_RE);
+    if (!m) return (setError("dob", "Use the format DD / MM / YYYY"), false);
+
+    var day = parseInt(m[1], 10);
+    var month = parseInt(m[2], 10);
+    var year = parseInt(m[3], 10);
+
+    if (month < 1 || month > 12)
+      return (setError("dob", "Month must be between 01 and 12"), false);
+
+    var daysInMonth = new Date(year, month, 0).getDate();
+    if (day < 1 || day > daysInMonth)
+      return (
+        setError("dob", "Please enter a valid day for that month"),
+        false
+      );
+
+    var now = new Date();
+    var entered = new Date(year, month - 1, day);
+
+    if (entered > now)
+      return (setError("dob", "Date of birth cannot be in the future"), false);
+
+    if (year < 1900)
+      return (setError("dob", "Please enter a valid year"), false);
+
+    var age = now.getFullYear() - year;
+    var hadBirthday =
+      now.getMonth() + 1 > month ||
+      (now.getMonth() + 1 === month && now.getDate() >= day);
+    if (!hadBirthday) age -= 1;
+    if (age < 13)
+      return (setError("dob", "You must be at least 13 years old"), false);
+
+    clearError("dob");
+    return true;
+  }
+
+  function validateCountry() {
+    if (fields.country.input.value === "")
+      return (setError("country", "Please select your country"), false);
+    clearError("country");
+    return true;
+  }
+
+  function validateLanguage() {
+    if (fields.language.input.value === "")
+      return (
+        setError("language", "Please select a preferred language"),
+        false
+      );
+    clearError("language");
+    return true;
+  }
+
+  /* ── Live error clearing ────────────────────────────── */
+  var liveMap = [
+    ["name", "input"],
+    ["email", "input"],
+    ["phone", "input"],
+    ["dob", "input"],
+    ["country", "change"],
+    ["language", "change"],
+  ];
+  liveMap.forEach(function (pair) {
+    var f = fields[pair[0]];
+    if (!f || !f.input) return;
+    f.input.addEventListener(pair[1], function () {
+      if (f.field.classList.contains("has-error")) clearError(pair[0]);
+    });
+  });
+
+  /* ── Submit ─────────────────────────────────────────── */
+  form.addEventListener("submit", function (e) {
+    /* Always prevent first so we can validate ourselves */
+    e.preventDefault();
+
+    var results = [
+      validateName(),
+      validateEmail(),
+      validatePhone(),
+      validateDob(),
+      validateCountry(),
+      validateLanguage(),
+    ];
+
+    var valid = results.every(Boolean);
+
+    if (!valid) {
+      /* Focus the first invalid input */
+      var firstBad = form.querySelector(".form-field.has-error .form-input");
+      if (firstBad && firstBad.focus) {
+        try {
+          firstBad.focus({ preventScroll: false });
+        } catch (err) {
+          firstBad.focus();
+        }
+        if (firstBad.scrollIntoView) {
+          firstBad.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
+      return;
+    }
+
+    /* Everything is valid — hand off to the browser so the
+         action="./404.html" + method="get" navigation happens. */
+    form.submit();
+  });
+})();
+(function () {
+  "use strict";
+
+  var form = document.getElementById("sendForm");
+  if (!form) return;
+
+  /* ── Field registry ─────────────────────────────────── */
+  var fields = {
+    recipient: {
+      input: document.getElementById("sendRecipient"),
+      field: document.getElementById("sendFieldRecipient"),
+      error: document.getElementById("sendErrRecipient"),
+    },
+    amount: {
+      input: document.getElementById("sendAmount"),
+      field: document.getElementById("sendFieldAmount"),
+      error: document.getElementById("sendErrAmount"),
+    },
+    from: {
+      input: document.getElementById("sendFrom"),
+      field: document.getElementById("sendFieldFrom"),
+      error: document.getElementById("sendErrFrom"),
+    },
+    note: {
+      input: document.getElementById("sendNote"),
+      field: document.getElementById("sendFieldNote"),
+      error: document.getElementById("sendErrNote"),
+    },
+  };
+
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var AMOUNT_RE = /^\d+(\.\d{1,2})?$/;
+
+  /* ── Error helpers ──────────────────────────────────── */
+  function setError(key, msg) {
+    var f = fields[key];
+    if (!f || !f.field) return;
+    f.field.classList.add("has-error");
+    if (f.error) f.error.textContent = msg;
+    if (f.input) f.input.setAttribute("aria-invalid", "true");
+
+    if (!f.field.dataset.shaken) {
+      f.field.classList.remove("shake");
+      void f.field.offsetWidth; /* force reflow to restart animation */
+      f.field.classList.add("shake");
+      f.field.dataset.shaken = "1";
+    }
+  }
+
+  function clearError(key) {
+    var f = fields[key];
+    if (!f || !f.field) return;
+    f.field.classList.remove("has-error", "shake");
+    delete f.field.dataset.shaken;
+    if (f.error) f.error.textContent = "";
+    if (f.input) f.input.removeAttribute("aria-invalid");
+  }
+
+  /* ── Validators ─────────────────────────────────────── */
+  function validateRecipient() {
+    var v = fields.recipient.input.value.trim();
+    if (v === "")
+      return (setError("recipient", "Please enter a recipient"), false);
+    if (v.length < 2)
+      return (
+        setError("recipient", "Recipient must be at least 2 characters"),
+        false
+      );
+
+    /* Accept either a name (≥2 chars) or a valid email */
+    var looksLikeEmail = v.indexOf("@") !== -1;
+    if (looksLikeEmail && !EMAIL_RE.test(v))
+      return (
+        setError("recipient", "Please enter a valid email address"),
+        false
+      );
+
+    clearError("recipient");
+    return true;
+  }
+
+  function validateAmount() {
+    var v = fields.amount.input.value.trim();
+    if (v === "") return (setError("amount", "Please enter an amount"), false);
+
+    /* Strip a leading $ and thousands separators for friendliness */
+    var cleaned = v.replace(/^\$/, "").replace(/,/g, "");
+
+    if (!AMOUNT_RE.test(cleaned))
+      return (setError("amount", "Enter a valid amount (e.g. 25.00)"), false);
+
+    var num = parseFloat(cleaned);
+    if (!isFinite(num) || num <= 0)
+      return (setError("amount", "Amount must be greater than 0"), false);
+
+    if (num > 1000000)
+      return (
+        setError("amount", "Amount exceeds the per-transfer limit"),
+        false
+      );
+
+    clearError("amount");
+    return true;
+  }
+
+  function validateFrom() {
+    if (fields.from.input.value === "")
+      return (setError("from", "Please select an account to send from"), false);
+    clearError("from");
+    return true;
+  }
+
+  function validateNote() {
+    var v = fields.note.input.value.trim();
+    if (v === "") return (setError("note", "Please add a short note"), false);
+    if (v.length < 2)
+      return (setError("note", "Note must be at least 2 characters"), false);
+    if (v.length > 140)
+      return (setError("note", "Note must be 140 characters or fewer"), false);
+    clearError("note");
+    return true;
+  }
+
+  /* ── Live error clearing + amount input sanitiser ───── */
+  var liveMap = [
+    ["recipient", "input"],
+    ["amount", "input"],
+    ["from", "change"],
+    ["note", "input"],
+  ];
+  liveMap.forEach(function (pair) {
+    var f = fields[pair[0]];
+    if (!f || !f.input) return;
+    f.input.addEventListener(pair[1], function () {
+      if (f.field.classList.contains("has-error")) clearError(pair[0]);
+    });
+  });
+
+  /* Keep the amount field tidy: digits, one dot, max 2 decimals */
+  fields.amount.input.addEventListener("input", function () {
+    var raw = this.value;
+    var cleaned = raw
+      .replace(/[^\d.]/g, "") /* digits and dots only */
+      .replace(/^\./, "") /* no leading dot */
+      .replace(/(\..*)\./g, "$1"); /* only the first dot survives */
+    var parts = cleaned.split(".");
+    if (parts.length === 2) {
+      parts[1] = parts[1].slice(0, 2);
+      cleaned = parts[0] + "." + parts[1];
+    }
+    if (cleaned !== raw) this.value = cleaned;
+  });
+
+  /* ── Submit ─────────────────────────────────────────── */
+  form.addEventListener("submit", function (e) {
+    /* Always prevent first so we can validate ourselves */
+    e.preventDefault();
+
+    var results = [
+      validateRecipient(),
+      validateAmount(),
+      validateFrom(),
+      validateNote(),
+    ];
+
+    var valid = results.every(Boolean);
+
+    if (!valid) {
+      /* Focus the first invalid input */
+      var firstBad = form.querySelector(".form-field.has-error .form-input");
+      if (firstBad && firstBad.focus) {
+        try {
+          firstBad.focus({ preventScroll: false });
+        } catch (err) {
+          firstBad.focus();
+        }
+        if (firstBad.scrollIntoView) {
+          firstBad.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
+      return;
+    }
+
+    /* Everything is valid — hand off to the browser so the
+         action="./404.html" + method="get" navigation happens. */
+    form.submit();
+  });
+})();
+
+</script>
+
+</body>
+</html>
